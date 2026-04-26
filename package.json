@@ -28,8 +28,17 @@
   ],
   "keywords": [
     "gradle",
+    "gcu",
+    "cli",
+    "dependencies",
+    "dependency-updater",
     "update-checker",
-    "dependency-checker"
+    "dependency-checker",
+    "version-catalog",
+    "outdated",
+    "kotlin",
+    "groovy",
+    "maven"
   ],
   "scripts": {
     "build": "tsdown",
