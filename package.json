@@ -2,7 +2,7 @@
   "name": "gradle-check-updates",
   "type": "module",
   "version": "0.0.0",
-  "description": "CLI that scans a project's build files, finds available dependency upgrades, and rewrites version strings in place",
+  "description": "Upgrade Gradle dependencies to their latest versions",
   "author": "SecretX33 <notyetmidnight@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/SecretX33/gradle-check-updates#readme",

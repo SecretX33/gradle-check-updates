@@ -228,6 +228,6 @@ With the above file, `gcu` reads `process.env.NEXUS_TOKEN`, `process.env.ARTIFAC
 | `4` | Network / repository error |
 | `5` | Rich-block coherence conflict prevented a rewrite |
 
-## Links
+## License
 
-For full spec and design, see [docs/BOOTSTRAP.md](docs/BOOTSTRAP.md).
+MIT
