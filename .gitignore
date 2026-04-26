@@ -1,0 +1,30 @@
+# Worktrees
+.worktrees/
+
+# Dependency directories
+node_modules/
+
+# Build output
+dist/
+coverage/
+
+# Environment variables
+.env
+.mcp.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Editor directories and files
+.idea/
+.vscode/
+.claude/
+
+# npm pack artifacts
+*.tgz
+
+# System Files
+.DS_Store
+Thumbs.db

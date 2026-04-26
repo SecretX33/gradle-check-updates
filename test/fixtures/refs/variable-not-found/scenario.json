@@ -1,0 +1,39 @@
+{
+  "description": "A consumer references a variable that has no matching prop or catalog-version definition. resolveRefs should emit one RefError with the correct varName and exclude the consumer from output occurrences.",
+  "input": {
+    "occurrences": [
+      {
+        "group": "com.example",
+        "artifact": "missing-dep",
+        "dependencyKey": "com.example:missing-dep",
+        "file": "/app/build.gradle",
+        "byteStart": 100,
+        "byteEnd": 110,
+        "fileType": "groovy-dsl",
+        "currentRaw": "$undeclaredVersion",
+        "shape": "exact",
+        "via": ["__pending_ref__:undeclaredVersion"]
+      }
+    ]
+  },
+  "expected": {
+    "occurrences": [],
+    "errors": [
+      {
+        "varName": "undeclaredVersion",
+        "consumer": {
+          "group": "com.example",
+          "artifact": "missing-dep",
+          "dependencyKey": "com.example:missing-dep",
+          "file": "/app/build.gradle",
+          "byteStart": 100,
+          "byteEnd": 110,
+          "fileType": "groovy-dsl",
+          "currentRaw": "$undeclaredVersion",
+          "shape": "exact",
+          "via": ["__pending_ref__:undeclaredVersion"]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Keep CRLF fixture files byte-for-byte intact
+test/fixtures/groovy-dsl/exact-crlf/* binary
+test/fixtures/kotlin-dsl/exact-crlf/* binary

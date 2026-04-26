@@ -1,0 +1,2 @@
+[libraries]
+mylib = { module = "com.example:mylib", version = { strictly = "1.7.20", prefer = "1.7.20" } }

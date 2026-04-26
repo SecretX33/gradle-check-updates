@@ -1,0 +1,2 @@
+[libraries]
+foo = { module = "com.example:foo", version = "2.0" }

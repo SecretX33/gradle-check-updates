@@ -1,0 +1,7 @@
+[versions]
+kotlin = "1.9.0"
+junit = "5.10.1"
+
+[libraries]
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }

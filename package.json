@@ -1,0 +1,61 @@
+{
+  "name": "gradle-check-updates",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "CLI that scans a project's build files, finds available dependency upgrades, and rewrites version strings in place",
+  "author": "SecretX33 <notyetmidnight@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/SecretX33/gradle-check-updates#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SecretX33/gradle-check-updates.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SecretX33/gradle-check-updates/issues"
+  },
+  "bin": {
+    "gcu": "dist/index.js",
+    "gradle-check-updates": "dist/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "gradle",
+    "update-checker",
+    "dependency-checker"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch --env.NODE_ENV=development",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --check --cache src",
+    "format:write": "prettier --write --cache src"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "8.4.1",
+    "cac": "7.0.0",
+    "fast-xml-parser": "5.7.1",
+    "kleur": "4.1.5",
+    "picomatch": "4.0.4",
+    "undici": "8.1.0",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "25.6.0",
+    "@types/picomatch": "4.0.3",
+    "@vitest/coverage-v8": "4.1.4",
+    "prettier": "3.8.3",
+    "tsdown": "0.21.9",
+    "typescript": "6.0.3",
+    "vitest": "4.1.4"
+  }
+}

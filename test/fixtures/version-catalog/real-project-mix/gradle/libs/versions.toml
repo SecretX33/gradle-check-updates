@@ -1,0 +1,289 @@
+[versions]
+# Kotlin
+kotlin = "2.3.0"
+kotlinx-coroutines = "1.10.2"
+kotlinx-serialization = "1.9.0"
+
+# Spring
+spring-boot = "3.5.11"
+spring-dependency-management = "1.1.7"
+
+# Jackson
+jackson-bom = "2.21.1" # let's stick with jackson 2 until everything upgrades https://github.com/FasterXML/jackson/blob/main/jackson3/MIGRATING_TO_JACKSON_3.md
+jackson-dataformat-msgpack = "0.9.11"
+
+# Database
+postgresql = "42.7.9"
+jts-core = "1.20.0"
+liquibase = "4.33.0" # liquibase 5 is out, but please do regression testing before upgrading: https://github.com/liquibase/liquibase/releases
+hypersistence-utils = "3.14.1"
+h2 = "2.4.240"
+hibernate-vector = "6.6.41.Final"
+
+# Google
+google-maps-services = "2.2.0"
+google-maps-places = "0.54.0"
+google-maps-routing = "1.66.0"
+google-genai = "1.38.0"
+guava = "33.5.0-jre"
+protobuf = "4.33.2" # Testing latest
+
+# Testing
+mockk = "1.14.7"
+assertj = "3.27.7"
+springmockk = "5.0.1"
+mockito = "5.21.0"
+testcontainers = "1.20.4"
+
+# Logging
+logstash-logback-encoder = "8.1" # v9+ is dependent on jackson 3+
+
+# Caching
+jedis = "7.2.0"
+
+# Utils
+commons-csv = "1.14.1"
+commons-lang3 = "3.20.0"
+commons-codec = "1.20.0"
+commons-beanutils = "1.11.0"
+commons-pool2 = "2.13.1"
+jsoup = "1.22.1"
+bouncycastle = "1.83"
+bucket4j = "8.16.0"
+ipaddress = "5.5.1"
+geoip2 = "4.4.0"
+browscap = "1.5.1"
+
+# HTTP Clients
+httpclient5 = "5.6"
+httpcore5 = "5.4"
+
+# Arrow
+arrow = "2.2.1.1"
+
+# Auth
+auth0 = "1.5.3"
+jwt = "0.13.0"
+
+# Other
+telnyx = "5.3.0"
+xmlunit = "2.11.0"
+libphonenumber = "9.0.21"
+
+# Monitoring
+datadog-trace-api = "1.57.0"
+opentracing-api = "0.33.0"
+micrometer-core = "1.16.1"
+micrometer-registry-otlp = "1.16.1"
+opentelemetry-bom = "1.57.0"
+opentelemetry-instrumentation-bom = "2.23.0"
+opentelemetry-micrometer = "2.23.0-alpha"
+opentelemetry-logback-appender = "2.23.0-alpha"
+
+# LLM
+langchain4j = "1.12.2"
+anthropic-java = "2.17.0"
+
+# Caffeine
+caffeine = "3.2.3"
+
+# SFTP
+jsch = "2.27.7"
+
+# Logbook
+logbook = "3.12.3"
+
+# CSV Processing
+opencsv = "5.12.0"
+
+# Image Processing
+metadata-extractor = "2.19.0"
+
+# Slack
+slack = "1.46.0"
+
+# AWS
+aws-sdk-v2 = "2.41.1"
+
+[libraries]
+# Kotlin
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-slf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+
+# Spring Boot
+spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
+spring-boot-starter-data-redis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
+spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
+spring-boot-starter-cache = { module = "org.springframework.boot:spring-boot-starter-cache" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-boot-configuration-processor = { module = "org.springframework.boot:spring-boot-configuration-processor" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+spring-security-config = { module = "org.springframework.security:spring-security-config" }
+spring-security-oauth2-client = { module = "org.springframework.security:spring-security-oauth2-client" }
+spring-security-test = { module = "org.springframework.security:spring-security-test" }
+spring-session-data-redis = { module = "org.springframework.session:spring-session-data-redis" }
+spring-data-commons = { module = "org.springframework.data:spring-data-commons" }
+
+# Jackson
+jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson-bom" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
+jackson-module-jakarta-xmlbind = { module = "com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations" }
+jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
+jackson-dataformat-msgpack = { module = "org.msgpack:jackson-dataformat-msgpack", version.ref = "jackson-dataformat-msgpack" }
+
+# Database
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+liquibase-core = { module = "org.liquibase:liquibase-core", version.ref = "liquibase" }
+hypersistence-utils = { module = "io.hypersistence:hypersistence-utils-hibernate-63", version.ref = "hypersistence-utils" }
+h2 = { module = "com.h2database:h2", version.ref = "h2" }
+hibernate-vector = { module = "org.hibernate.orm:hibernate-vector", version.ref = "hibernate-vector" }
+jts-core = { module = "org.locationtech.jts:jts-core", version.ref = "jts-core" }
+
+# Google
+google-maps-services = { module = "com.google.maps:google-maps-services", version.ref = "google-maps-services" }
+google-maps-places = { module = "com.google.maps:google-maps-places", version.ref = "google-maps-places" }
+google-maps-routing = { module = "com.google.maps:google-maps-routing", version.ref = "google-maps-routing" }
+google-genai = { module = "com.google.genai:google-genai", version.ref = "google-genai" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
+libphonenumber = { module = "com.googlecode.libphonenumber:libphonenumber", version.ref = "libphonenumber" }
+
+# Testing
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+springmockk = { module = "com.ninja-squad:springmockk", version.ref = "springmockk" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+reactor-test = { module = "io.projectreactor:reactor-test" }
+bucket4j = { module = "com.bucket4j:bucket4j_jdk17-core", version.ref = "bucket4j" }
+xmlunit-core = { module = "org.xmlunit:xmlunit-core", version.ref = "xmlunit" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+
+# Logging
+logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
+
+# Caching
+jedis = { module = "redis.clients:jedis", version.ref = "jedis" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+
+# Utils
+commons-csv = { module = "org.apache.commons:commons-csv", version.ref = "commons-csv" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
+commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
+commons-beanutils = { module = "commons-beanutils:commons-beanutils", version.ref = "commons-beanutils" }
+commons-pool2 = { module = "org.apache.commons:commons-pool2", version.ref = "commons-pool2" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+
+bouncycastle = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
+jsch = { module = "com.github.mwiede:jsch", version.ref = "jsch" }
+opencsv = { module = "com.opencsv:opencsv", version.ref = "opencsv" }
+metadata-extractor = { module = "com.drewnoakes:metadata-extractor", version.ref = "metadata-extractor" }
+ipaddress = { module = "com.github.seancfoley:ipaddress", version.ref = "ipaddress" }
+geoip2 = { module = "com.maxmind.geoip2:geoip2", version.ref = "geoip2" }
+browscap = { module = "com.blueconic:browscap-java", version.ref = "browscap" }
+
+# HTTP Clients
+httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5", version.ref = "httpclient5" }
+httpcore5 = { module = "org.apache.httpcomponents.core5:httpcore5", version.ref = "httpcore5" }
+httpcore5-h2 = { module = "org.apache.httpcomponents.core5:httpcore5-h2", version.ref = "httpcore5" }
+
+# Arrow
+arrow-bom = { module = "io.arrow-kt:arrow-stack", version.ref = "arrow" }
+arrow-core = { module = "io.arrow-kt:arrow-core" }
+arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines" }
+arrow-resilience = { module = "io.arrow-kt:arrow-resilience" }
+
+# Auth
+auth0-spring-security = { module = "com.auth0:auth0-spring-security-api", version.ref = "auth0" }
+jwt = { module = "io.jsonwebtoken:jjwt", version.ref = "jwt" }
+jwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jwt" }
+jwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jwt" }
+jwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jwt" }
+
+# Monitoring
+datadog-trace-api = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog-trace-api" }
+opentracing-api = { module = "io.opentracing:opentracing-api", version.ref = "opentracing-api" }
+opentracing-util = { module = "io.opentracing:opentracing-util", version.ref = "opentracing-api" }
+micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "micrometer-core" }
+micrometer-registry-otlp = { module = "io.micrometer:micrometer-registry-otlp", version.ref = "micrometer-registry-otlp" }
+opentelemetry-bom = { module = "io.opentelemetry:opentelemetry-bom", version.ref = "opentelemetry-bom" }
+opentelemetry-instrumentation-bom = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom", version.ref = "opentelemetry-instrumentation-bom" }
+opentelemetry-api = { module = "io.opentelemetry:opentelemetry-api" }
+opentelemetry-sdk = { module = "io.opentelemetry:opentelemetry-sdk" }
+opentelemetry-micrometer = { module = "io.opentelemetry.instrumentation:opentelemetry-micrometer-1.5", version.ref = "opentelemetry-micrometer" }
+opentelemetry-logback-appender = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0", version.ref = "opentelemetry-logback-appender" }
+opentelemetry-logback-mdc = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0", version.ref = "opentelemetry-logback-appender" }
+opentelemetry-extension-kotlin = { module = "io.opentelemetry:opentelemetry-extension-kotlin" }
+
+# Other
+telnyx = { module = "com.telnyx.sdk:telnyx", version.ref = "telnyx" }
+jakarta-persistence-api = { module = "jakarta.persistence:jakarta.persistence-api" }
+slack = { module = "com.slack.api:slack-api-client", version.ref = "slack" }
+
+# LLM
+langchain4j-bom = { module = "dev.langchain4j:langchain4j-bom", version.ref = "langchain4j" }
+langchain4j-anthropic = { module = "dev.langchain4j:langchain4j-anthropic-spring-boot-starter" }
+langchain4j-openai = { module = "dev.langchain4j:langchain4j-open-ai-spring-boot-starter" }
+langchain4j-vertex-ai-gemini = { module = "dev.langchain4j:langchain4j-vertex-ai-gemini" }
+langchain4j-vertex-ai = { module = "dev.langchain4j:langchain4j-vertex-ai" }
+langchain4j-core = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
+langchain4j-google-ai-gemini = { module = "dev.langchain4j:langchain4j-google-ai-gemini" }
+langchain4j-http-client-spring-restclient = { module = "dev.langchain4j:langchain4j-http-client-spring-restclient" }
+langchain4j-bedrock = { module = "dev.langchain4j:langchain4j-bedrock", version.ref = "langchain4j" }
+langchain4j-web-search-engine-tavily = { module = "dev.langchain4j:langchain4j-web-search-engine-tavily" }
+anthropic-java = { module = "com.anthropic:anthropic-java", version.ref = "anthropic-java" }
+anthropic-java-core = { module = "com.anthropic:anthropic-java-core", version.ref = "anthropic-java" }
+anthropic-java-bedrock = { module = "com.anthropic:anthropic-java-bedrock", version.ref = "anthropic-java" }
+
+# AWS SDK v2
+aws-sdk-s3 = { module = "software.amazon.awssdk:s3", version.ref = "aws-sdk-v2" }
+aws-sdk-sts = { module = "software.amazon.awssdk:sts", version.ref = "aws-sdk-v2" }
+aws-sdk-sqs = { module = "software.amazon.awssdk:sqs", version.ref = "aws-sdk-v2" }
+aws-sdk-dynamodb = { module = "software.amazon.awssdk:dynamodb", version.ref = "aws-sdk-v2" }
+aws-sdk-bedrock = { module = "software.amazon.awssdk:bedrockruntime", version.ref = "aws-sdk-v2" }
+aws-sdk-sso = { module = "software.amazon.awssdk:sso", version.ref = "aws-sdk-v2" }
+aws-sdk-ssooidc = { module = "software.amazon.awssdk:ssooidc", version.ref = "aws-sdk-v2" }
+
+# Logbook
+logbook-spring-boot-starter = { module = "org.zalando:logbook-spring-boot-starter", version.ref = "logbook" }
+logbook-logstash = { module = "org.zalando:logbook-logstash", version.ref = "logbook" }
+logbook-httpclient5 = { module = "org.zalando:logbook-httpclient5", version.ref = "logbook" }
+logbook-spring-webflux = { module = "org.zalando:logbook-spring-webflux", version.ref = "logbook" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
+kotlin-noarg = { id = "org.jetbrains.kotlin.plugin.noarg", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
+
+[bundles]
+kotlin-core = ["kotlin-stdlib", "kotlin-reflect"]
+kotlin-coroutines = ["kotlinx-coroutines-core", "kotlinx-coroutines-slf4j", "kotlinx-coroutines-reactor"]
+jackson = ["jackson-module-kotlin", "jackson-module-jakarta-xmlbind", "jackson-datatype-jsr310", "jackson-databind"]
+google-maps = ["google-maps-services", "google-maps-places", "google-maps-routing"]
+jwt = ["jwt", "jwt-impl", "jwt-jackson", "jwt-api"]
+monitoring = ["micrometer-core", "micrometer-registry-otlp", "opentelemetry-api", "opentelemetry-sdk", "opentelemetry-micrometer", "opentelemetry-extension-kotlin"]
+langchain4j = [
+    "langchain4j-core",
+    "langchain4j-anthropic",
+    "langchain4j-openai",
+    "langchain4j-vertex-ai",
+    "langchain4j-vertex-ai-gemini",
+    "langchain4j-google-ai-gemini",
+    "langchain4j-http-client-spring-restclient",
+    "langchain4j-bedrock",
+]

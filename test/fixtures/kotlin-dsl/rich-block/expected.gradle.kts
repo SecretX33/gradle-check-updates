@@ -1,0 +1,8 @@
+dependencies {
+    implementation("org.foo:bar") {
+        version {
+            strictly("2.0.0")
+            prefer("2.0.0")
+        }
+    }
+}

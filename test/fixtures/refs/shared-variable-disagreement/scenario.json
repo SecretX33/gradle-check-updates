@@ -1,0 +1,60 @@
+{
+  "description": "Two library consumers share the same kotlinVersion prop definition. Policy will warn when their upgrade winners differ.",
+  "input": {
+    "occurrences": [
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-stdlib",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-stdlib",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact",
+        "via": ["/app/build.gradle"]
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-reflect",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-reflect",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact",
+        "via": ["/app/build.gradle"]
+      }
+    ]
+  },
+  "expected": {
+    "occurrences": [
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-stdlib",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-stdlib",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact",
+        "via": ["/app/build.gradle"]
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-reflect",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-reflect",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact",
+        "via": ["/app/build.gradle"]
+      }
+    ],
+    "errors": []
+  }
+}

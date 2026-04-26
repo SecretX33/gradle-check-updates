@@ -1,0 +1,5 @@
+[versions]
+compose-bom = "2024.02.00"
+
+[libraries]
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
