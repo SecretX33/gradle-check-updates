@@ -527,6 +527,43 @@ describe("runPolicy", () => {
 
       expect(includedDecision?.status).toBe("upgrade");
       expect(excludedDecision?.status).toBe("no-change");
+      expect(excludedDecision?.reason).toBe("excluded");
+    });
+
+    it("stamped reason does not bleed onto included deps", () => {
+      const occurrence = makeOccurrence({
+        group: "com.example",
+        artifact: "lib",
+        currentRaw: "1.0.0",
+        dependencyKey: "com.example:lib",
+      });
+      const metadata = makeMetadata(["1.0.0", "2.0.0"]);
+
+      const decisions = runPolicy([occurrence], metadata, () => ({}), NOW);
+
+      expect(decisions[0]?.status).toBe("upgrade");
+      expect(decisions[0]?.reason).toBeUndefined();
+    });
+
+    it("excluded dep retains latestAvailable for informational purposes", () => {
+      const occurrence = makeOccurrence({
+        group: "tools.jackson",
+        artifact: "jackson-bom",
+        currentRaw: "3.0.0",
+        dependencyKey: "tools.jackson:jackson-bom",
+      });
+      const metadata = makeMetadata(["3.0.0", "3.1.2"]);
+
+      const decisions = runPolicy(
+        [occurrence],
+        metadata,
+        () => ({ excludes: ["tools.**"] }),
+        NOW,
+      );
+
+      expect(decisions[0]?.status).toBe("no-change");
+      expect(decisions[0]?.reason).toBe("excluded");
+      expect(decisions[0]?.latestAvailable).toBe("3.1.2");
     });
   });
 });

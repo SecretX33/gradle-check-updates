@@ -74,6 +74,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   const stdout = options?.stdout ?? process.stdout;
   const stderr = options?.stderr ?? process.stderr;
   const isStderrTTY = Boolean((stderr as NodeJS.WriteStream).isTTY);
+  const quietMode = args.json;
 
   // Progress bar state — declared early so the stderrForClient closure can reference them.
   let progressActive = false;
@@ -133,7 +134,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     }
     throw error;
   }
-  if (args.verbose && userConfig !== undefined) {
+  if (args.verboseLevel >= 1 && userConfig !== undefined) {
     stderr.write(`Loaded global config: ${join(gcuHome, "config.json")}\n`);
   }
 
@@ -147,7 +148,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     }
     throw error;
   }
-  if (args.verbose && credentials.size > 0) {
+  if (args.verboseLevel >= 1 && credentials.size > 0) {
     stderr.write(
       `Loaded credentials for ${credentials.size} ${credentials.size === 1 ? "repository" : "repositories"}\n`,
     );
@@ -156,7 +157,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   const configResolver = new ConfigResolver(
     projectRoot,
     userConfig,
-    args.verbose
+    args.verboseLevel >= 1
       ? (configPath, config) => {
           stderr.write(`Found config file: ${configPath}\n`);
           const entries = Object.entries(config).filter(
@@ -167,6 +168,11 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
           }
         }
       : undefined,
+    (configPath, error) => {
+      stderr.write(
+        `gcu: warning: could not load config file ${configPath}: ${(error as Error).message}\n`,
+      );
+    },
   );
 
   // ── File scanning phase (walk + parse) ──────────────────────────────────────
@@ -174,24 +180,26 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   let spinnerFrameIndex = 0;
   let spinnerInterval: ReturnType<typeof setInterval> | null = null;
 
-  if (isStderrTTY && !args.verbose) {
-    // In TTY non-verbose mode: animated braille spinner on its own line.
-    // Initial write has no \r so it appears cleanly; subsequent updates use \x1b[2K\r to
-    // erase and rewrite the same line.
-    stderr.write(`Scanning files... ${SPINNER_FRAMES[0]!}`);
-    spinnerInterval = setInterval(() => {
-      spinnerFrameIndex = (spinnerFrameIndex + 1) % SPINNER_FRAMES.length;
-      stderr.write(`\x1b[2K\rScanning files... ${SPINNER_FRAMES[spinnerFrameIndex]!}`);
-    }, 80);
-  } else {
-    stderr.write("Scanning files...\n");
+  if (!quietMode) {
+    if (isStderrTTY && args.verboseLevel === 0) {
+      // In TTY non-verbose mode: animated braille spinner on its own line.
+      // Initial write has no \r so it appears cleanly; subsequent updates use \x1b[2K\r to
+      // erase and rewrite the same line.
+      stderr.write(`Scanning files... ${SPINNER_FRAMES[0]!}`);
+      spinnerInterval = setInterval(() => {
+        spinnerFrameIndex = (spinnerFrameIndex + 1) % SPINNER_FRAMES.length;
+        stderr.write(`\x1b[2K\rScanning files... ${SPINNER_FRAMES[spinnerFrameIndex]!}`);
+      }, 80);
+    } else {
+      stderr.write("Scanning files...\n");
+    }
   }
 
   function clearSpinner(): void {
     if (spinnerInterval !== null) {
       clearInterval(spinnerInterval);
       spinnerInterval = null;
-      if (isStderrTTY) stderr.write("\x1b[2K\rScanning files... done\n");
+      if (!quietMode && isStderrTTY) stderr.write("\x1b[2K\rScanning files... done\n");
     }
   }
 
@@ -236,7 +244,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     }
     allOccurrences.push(...fileOccurrences);
 
-    if (args.verbose) {
+    if (args.verboseLevel >= 1) {
       const relPath = relative(projectRoot, buildFile).replace(/\\/g, "/");
       const count = fileOccurrences.length;
       stderr.write(
@@ -289,7 +297,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     }
   }
 
-  if (args.verbose) {
+  if (args.verboseLevel >= 1) {
     const fileCount = new Set(policyOccurrences.map((occurrence) => occurrence.file))
       .size;
     const depCount = uniqueDependencies.size;
@@ -309,7 +317,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
 
   if (args.clearCache) {
     await rm(cacheDir, { recursive: true, force: true });
-    if (args.verbose) stderr.write("Cache cleared.\n");
+    if (args.verboseLevel >= 1) stderr.write("Cache cleared.\n");
   }
 
   const cache = new Cache(join(cacheDir, "metadata"));
@@ -317,7 +325,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     cache,
     credentials,
     noCache: args.noCache,
-    verbose: args.verbose,
+    verbose: args.verboseLevel >= 1,
     stderr: stderrForClient,
   };
 
@@ -385,7 +393,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   }
 
   function writeProgress(): void {
-    if (!isStderrTTY || totalDeps === 0) return;
+    if (quietMode || !isStderrTTY || totalDeps === 0) return;
     progressActive = true;
     const barWidth = 22;
     const filled = Math.round((completedDeps / totalDeps) * barWidth);
@@ -396,7 +404,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     );
   }
 
-  if (!isStderrTTY && totalDeps > 0) {
+  if (!quietMode && !isStderrTTY && totalDeps > 0) {
     stderr.write("Fetching metadata from Maven repositories...\n");
   }
 
@@ -475,7 +483,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   const totalTimestampDeps = cooldownDeps.size;
 
   function writeTimestampProgress(): void {
-    if (!isStderrTTY || totalTimestampDeps === 0) return;
+    if (quietMode || !isStderrTTY || totalTimestampDeps === 0) return;
     timestampProgressActive = true;
     const barWidth = 22;
     const filled = Math.round((completedTimestampDeps / totalTimestampDeps) * barWidth);
@@ -487,7 +495,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   }
 
   if (cooldownDeps.size > 0) {
-    if (!isStderrTTY) {
+    if (!quietMode && !isStderrTTY) {
       stderr.write("Fetching timestamps...\n");
     }
 
@@ -569,8 +577,6 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   let interactiveSelectedDecisions: Decision[] | null = null;
 
   if (args.json) {
-    const humanOutput = renderTable(decisions, args.verbose, projectRoot, args.upgrade);
-    stderr.write(humanOutput + "\n");
     const jsonOutput = renderJson(decisions);
     stdout.write(jsonOutput + "\n");
   } else if (args.interactive) {
@@ -582,7 +588,12 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
       throw error;
     }
   } else {
-    const tableOutput = renderTable(decisions, args.verbose, projectRoot, args.upgrade);
+    const tableOutput = renderTable(
+      decisions,
+      args.verboseLevel,
+      projectRoot,
+      args.upgrade,
+    );
     stdout.write(tableOutput + "\n");
   }
 

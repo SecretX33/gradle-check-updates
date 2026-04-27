@@ -54,7 +54,7 @@ function buildArgs(overrides: Partial<ParsedArgs> = {}): ParsedArgs {
     exclude: [],
     json: false,
     errorOnOutdated: false,
-    verbose: false,
+    verboseLevel: 0,
     noCache: false,
     clearCache: false,
     concurrency: 5,

@@ -177,6 +177,7 @@ export function runPolicy(
         occurrence,
         status: "no-change",
         latestAvailable,
+        reason: "excluded",
       });
       proposedWinners.set(occurrence, undefined);
       continue;

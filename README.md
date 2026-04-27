@@ -46,11 +46,11 @@ gcu -i
 | `-t, --target <target>` | `major` | Version ceiling: `major`, `minor`, or `patch`                  |
 | `--pre`                 | `false` | Allow prereleases as candidates                                |
 | `--allow-downgrade`     | `false` | Cooldown escape hatch - requires `--cooldown`                  |
-| `--include <pattern>`   |         | Include filter, repeatable (e.g. `--include com.google.*`)     |
-| `--exclude <pattern>`   |         | Exclude filter, repeatable (e.g. `--exclude junit:*`)          |
+| `--include <pattern>`   |         | Include filter, repeatable. Accepts comma-separated patterns (e.g. `--include "com.google.*,org.jetbrains:*"`) or multiple flags (`--include com.google.* --include org.jetbrains:*`) |
+| `--exclude <pattern>`   |         | Exclude filter, repeatable. Accepts comma-separated patterns (e.g. `--exclude "junit:*,org.legacy:*"`) or multiple flags (`--exclude junit:* --exclude org.legacy:*`)  |
 | `--json`                | `false` | JSON output mode (human output goes to stderr, JSON to stdout) |
 | `--error-on-outdated`   | `false` | Exit 1 when upgrades are available but `-u` was not passed     |
-| `--verbose`             | `false` | Show held-by-target entries and per-entry severity annotations |
+| `--verbose [level]`     | `0`     | Verbosity. `--verbose` (or `--verbose 1`) shows held/skipped entries and per-entry annotations. `--verbose 2` additionally lists every detected dependency, including those already at the latest version - useful for confirming that your build files are being parsed correctly. |
 | `--concurrency <n>`     | `5`     | Max number of concurrent HTTP requests to the registry         |
 | `--no-cache`            | `false` | Bypass the local metadata cache for this run                   |
 | `--clear-cache`         | `false` | Delete the local cache before running, then fetch fresh data   |

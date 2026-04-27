@@ -12,7 +12,7 @@ export type ParsedArgs = {
   exclude: string[];
   json: boolean;
   errorOnOutdated: boolean;
-  verbose: boolean;
+  verboseLevel: 0 | 1 | 2;
   concurrency: number;
   noCache: boolean;
   clearCache: boolean;
@@ -26,8 +26,13 @@ const VALID_TARGETS = ["major", "minor", "patch"] as const;
 
 function normalizeToStringArray(value: unknown): string[] {
   if (value === undefined) return [];
-  if (Array.isArray(value)) return value.map(String);
-  return [String(value)];
+  const rawItems = Array.isArray(value) ? value.map(String) : [String(value)];
+  return rawItems.flatMap((item) =>
+    item
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
+  );
 }
 
 export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResult {
@@ -51,7 +56,10 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
     .option("--error-on-outdated", "Exit 1 when upgrades available but -u not passed", {
       default: false,
     })
-    .option("--verbose", "Show all held/skipped decisions", { default: false })
+    .option(
+      "--verbose [level]",
+      "Verbosity: 1 = show held/skipped decisions (default when no number); 2 = also list every detected dependency, including those with no available updates",
+    )
     .option("--concurrency <n>", "Max concurrent HTTP requests to registry", {
       default: 5,
     })
@@ -106,6 +114,21 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
     };
   }
 
+  const rawVerbose = options["verbose"];
+  let verboseLevel: 0 | 1 | 2;
+  if (rawVerbose === undefined || rawVerbose === false) {
+    verboseLevel = 0;
+  } else if (rawVerbose === true) {
+    verboseLevel = 1;
+  } else if (rawVerbose === 1 || rawVerbose === 2) {
+    verboseLevel = rawVerbose;
+  } else {
+    return {
+      ok: false,
+      error: `Invalid --verbose value "${rawVerbose}". Must be 1 or 2 (or pass --verbose alone for level 1).`,
+    };
+  }
+
   const rawConcurrency = options["concurrency"];
   const concurrency = Number(rawConcurrency);
   if (
@@ -133,7 +156,7 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
       exclude: normalizeToStringArray(options["exclude"]),
       json: options["json"] as boolean,
       errorOnOutdated: options["errorOnOutdated"] as boolean,
-      verbose: options["verbose"] as boolean,
+      verboseLevel,
       concurrency,
       noCache: options["cache"] === false,
       clearCache: Boolean(options["clearCache"]),

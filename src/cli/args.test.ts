@@ -19,7 +19,7 @@ describe("parseArgs", () => {
         exclude: [],
         json: false,
         errorOnOutdated: false,
-        verbose: false,
+        verboseLevel: 0,
         concurrency: 5,
         noCache: false,
         clearCache: false,
@@ -186,6 +186,53 @@ describe("parseArgs", () => {
     });
   });
 
+  it("splits comma-separated --include into multiple patterns", () => {
+    const result = parseArgs(["--include", "group1:name1,group2:name2,group3:name3"]);
+
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({
+        include: ["group1:name1", "group2:name2", "group3:name3"],
+      }),
+    });
+  });
+
+  it("splits comma-separated --exclude into multiple patterns", () => {
+    const result = parseArgs(["--exclude", "group1:name1,group2:name2"]);
+
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({ exclude: ["group1:name1", "group2:name2"] }),
+    });
+  });
+
+  it("mixes comma-separated and repeated --include flags", () => {
+    const result = parseArgs([
+      "--include",
+      "group1:name1,group2:name2",
+      "--include",
+      "group3:name3",
+    ]);
+
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({
+        include: ["group1:name1", "group2:name2", "group3:name3"],
+      }),
+    });
+  });
+
+  it("trims whitespace from comma-separated --include values", () => {
+    const result = parseArgs(["--include", "group1:name1, group2:name2 , group3:name3"]);
+
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({
+        include: ["group1:name1", "group2:name2", "group3:name3"],
+      }),
+    });
+  });
+
   it("enables --pre flag", () => {
     const result = parseArgs(["--pre"]);
 
@@ -263,5 +310,53 @@ describe("parseArgs", () => {
       ok: true,
       args: expect.objectContaining({ clearCache: true }),
     });
+  });
+
+  it("--verbose alone is verbose level 1", () => {
+    const result = parseArgs(["--verbose"]);
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({ verboseLevel: 1 }),
+    });
+  });
+
+  it("--verbose 1 is verbose level 1", () => {
+    const result = parseArgs(["--verbose", "1"]);
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({ verboseLevel: 1 }),
+    });
+  });
+
+  it("--verbose 2 is verbose level 2", () => {
+    const result = parseArgs(["--verbose", "2"]);
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({ verboseLevel: 2 }),
+    });
+  });
+
+  it("returns error for --verbose 3", () => {
+    const result = parseArgs(["--verbose", "3"]);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/verbose/i);
+    }
+  });
+
+  it("returns error for --verbose 0", () => {
+    const result = parseArgs(["--verbose", "0"]);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/verbose/i);
+    }
+  });
+
+  it("returns error for non-numeric --verbose value", () => {
+    const result = parseArgs(["--verbose", "foo"]);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/verbose/i);
+    }
   });
 });

@@ -58,7 +58,7 @@ function buildArgs(overrides: Partial<ParsedArgs> = {}): ParsedArgs {
     exclude: [],
     json: false,
     errorOnOutdated: false,
-    verbose: false,
+    verboseLevel: 0,
     concurrency: 5,
     noCache: false,
     clearCache: false,
@@ -150,7 +150,7 @@ describe("run() — table output", () => {
 });
 
 describe("run() — JSON output", () => {
-  it("writes JSON to stdout and human output to stderr", async () => {
+  it("writes valid JSON to stdout", async () => {
     const buildFile = join(tempDir, "build.gradle.kts");
     await writeFile(buildFile, SAMPLE_BUILD_GRADLE_KTS, "utf8");
 
@@ -164,10 +164,8 @@ describe("run() — JSON output", () => {
       },
     } as unknown as NodeJS.WritableStream;
 
-    const stderrChunks: string[] = [];
     const fakeStderr = {
-      write(chunk: string) {
-        stderrChunks.push(chunk);
+      write(_chunk: string) {
         return true;
       },
     } as unknown as NodeJS.WritableStream;
@@ -178,7 +176,6 @@ describe("run() — JSON output", () => {
     });
 
     const jsonOutput = stdoutChunks.join("");
-    const stderrOutput = stderrChunks.join("");
     const parsed = JSON.parse(jsonOutput) as { updates: unknown[] };
 
     expect(exitCode).toBe(0);
@@ -196,9 +193,126 @@ describe("run() — JSON output", () => {
     expect(firstUpdate.artifact).toBe("kotlin-stdlib");
     expect(firstUpdate.current).toBe("1.9.0");
     expect(firstUpdate.updated).toBe("2.0.21");
+  });
+});
 
-    // Human-readable table output must go to stderr when --json is used
-    expect(stderrOutput).toContain("kotlin-stdlib");
+describe("run() — --json quiet mode", () => {
+  it("writes nothing to stderr during a normal run", async () => {
+    const buildFile = join(tempDir, "build.gradle.kts");
+    await writeFile(buildFile, SAMPLE_BUILD_GRADLE_KTS, "utf8");
+
+    mockAllDefaultRepos(KOTLIN_STDLIB_METADATA_XML);
+
+    const fakeStdout = {
+      write(_chunk: string) {
+        return true;
+      },
+    } as unknown as NodeJS.WritableStream;
+
+    const stderrChunks: string[] = [];
+    const fakeStderr = {
+      write(chunk: string) {
+        stderrChunks.push(chunk);
+        return true;
+      },
+    } as unknown as NodeJS.WritableStream;
+
+    const exitCode = await run(buildArgs({ directory: tempDir, json: true }), {
+      stdout: fakeStdout,
+      stderr: fakeStderr,
+    });
+
+    expect(exitCode).toBe(0);
+    expect(stderrChunks.join("")).toBe("");
+  });
+
+  it("does not write human table output to stderr", async () => {
+    const buildFile = join(tempDir, "build.gradle.kts");
+    await writeFile(buildFile, SAMPLE_BUILD_GRADLE_KTS, "utf8");
+
+    mockAllDefaultRepos(KOTLIN_STDLIB_METADATA_XML);
+
+    const fakeStdout = {
+      write(_chunk: string) {
+        return true;
+      },
+    } as unknown as NodeJS.WritableStream;
+
+    const stderrChunks: string[] = [];
+    const fakeStderr = {
+      write(chunk: string) {
+        stderrChunks.push(chunk);
+        return true;
+      },
+    } as unknown as NodeJS.WritableStream;
+
+    await run(buildArgs({ directory: tempDir, json: true }), {
+      stdout: fakeStdout,
+      stderr: fakeStderr,
+    });
+
+    const stderrOutput = stderrChunks.join("");
+    expect(stderrOutput).not.toContain("kotlin-stdlib");
+    expect(stderrOutput).not.toContain("→");
+    expect(stderrOutput).not.toContain("upgrade");
+  });
+
+  it("does not write scanning or metadata progress messages to stderr", async () => {
+    const buildFile = join(tempDir, "build.gradle.kts");
+    await writeFile(buildFile, SAMPLE_BUILD_GRADLE_KTS, "utf8");
+
+    mockAllDefaultRepos(KOTLIN_STDLIB_METADATA_XML);
+
+    const fakeStdout = {
+      write(_chunk: string) {
+        return true;
+      },
+    } as unknown as NodeJS.WritableStream;
+
+    const stderrChunks: string[] = [];
+    const fakeStderr = {
+      write(chunk: string) {
+        stderrChunks.push(chunk);
+        return true;
+      },
+    } as unknown as NodeJS.WritableStream;
+
+    await run(buildArgs({ directory: tempDir, json: true }), {
+      stdout: fakeStdout,
+      stderr: fakeStderr,
+    });
+
+    const stderrOutput = stderrChunks.join("");
+    expect(stderrOutput).not.toContain("Scanning files");
+    expect(stderrOutput).not.toContain("Fetching metadata");
+    expect(stderrOutput).not.toContain("Fetching timestamps");
+  });
+
+  it("still writes genuine error messages to stderr", async () => {
+    mockRepo({});
+
+    const fakeStdout = {
+      write(_chunk: string) {
+        return true;
+      },
+    } as unknown as NodeJS.WritableStream;
+
+    const stderrChunks: string[] = [];
+    const fakeStderr = {
+      write(chunk: string) {
+        stderrChunks.push(chunk);
+        return true;
+      },
+    } as unknown as NodeJS.WritableStream;
+
+    const exitCode = await run(buildArgs({ directory: tempDir, json: true }), {
+      stdout: fakeStdout,
+      stderr: fakeStderr,
+    });
+
+    expect(exitCode).toBe(2);
+    expect(stderrChunks.join("")).toContain("build.gradle");
+    expect(stderrChunks.join("")).toContain("aborting");
   });
 });
 
@@ -417,7 +531,7 @@ describe("run() — cooldown", () => {
     } as unknown as NodeJS.WritableStream;
 
     const exitCode = await run(
-      buildArgs({ directory: tempDir, cooldown: 7, verbose: true }),
+      buildArgs({ directory: tempDir, cooldown: 7, verboseLevel: 1 }),
       {
         stdout: fakeStdout,
         stderr: fakeStderr,
