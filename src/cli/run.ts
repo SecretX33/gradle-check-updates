@@ -74,6 +74,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   const stdout = options?.stdout ?? process.stdout;
   const stderr = options?.stderr ?? process.stderr;
   const isStderrTTY = Boolean((stderr as NodeJS.WriteStream).isTTY);
+  const quietMode = args.json;
 
   // Progress bar state — declared early so the stderrForClient closure can reference them.
   let progressActive = false;
@@ -179,24 +180,26 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   let spinnerFrameIndex = 0;
   let spinnerInterval: ReturnType<typeof setInterval> | null = null;
 
-  if (isStderrTTY && args.verboseLevel === 0) {
-    // In TTY non-verbose mode: animated braille spinner on its own line.
-    // Initial write has no \r so it appears cleanly; subsequent updates use \x1b[2K\r to
-    // erase and rewrite the same line.
-    stderr.write(`Scanning files... ${SPINNER_FRAMES[0]!}`);
-    spinnerInterval = setInterval(() => {
-      spinnerFrameIndex = (spinnerFrameIndex + 1) % SPINNER_FRAMES.length;
-      stderr.write(`\x1b[2K\rScanning files... ${SPINNER_FRAMES[spinnerFrameIndex]!}`);
-    }, 80);
-  } else {
-    stderr.write("Scanning files...\n");
+  if (!quietMode) {
+    if (isStderrTTY && args.verboseLevel === 0) {
+      // In TTY non-verbose mode: animated braille spinner on its own line.
+      // Initial write has no \r so it appears cleanly; subsequent updates use \x1b[2K\r to
+      // erase and rewrite the same line.
+      stderr.write(`Scanning files... ${SPINNER_FRAMES[0]!}`);
+      spinnerInterval = setInterval(() => {
+        spinnerFrameIndex = (spinnerFrameIndex + 1) % SPINNER_FRAMES.length;
+        stderr.write(`\x1b[2K\rScanning files... ${SPINNER_FRAMES[spinnerFrameIndex]!}`);
+      }, 80);
+    } else {
+      stderr.write("Scanning files...\n");
+    }
   }
 
   function clearSpinner(): void {
     if (spinnerInterval !== null) {
       clearInterval(spinnerInterval);
       spinnerInterval = null;
-      if (isStderrTTY) stderr.write("\x1b[2K\rScanning files... done\n");
+      if (!quietMode && isStderrTTY) stderr.write("\x1b[2K\rScanning files... done\n");
     }
   }
 
@@ -390,7 +393,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   }
 
   function writeProgress(): void {
-    if (!isStderrTTY || totalDeps === 0) return;
+    if (quietMode || !isStderrTTY || totalDeps === 0) return;
     progressActive = true;
     const barWidth = 22;
     const filled = Math.round((completedDeps / totalDeps) * barWidth);
@@ -401,7 +404,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     );
   }
 
-  if (!isStderrTTY && totalDeps > 0) {
+  if (!quietMode && !isStderrTTY && totalDeps > 0) {
     stderr.write("Fetching metadata from Maven repositories...\n");
   }
 
@@ -480,7 +483,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   const totalTimestampDeps = cooldownDeps.size;
 
   function writeTimestampProgress(): void {
-    if (!isStderrTTY || totalTimestampDeps === 0) return;
+    if (quietMode || !isStderrTTY || totalTimestampDeps === 0) return;
     timestampProgressActive = true;
     const barWidth = 22;
     const filled = Math.round((completedTimestampDeps / totalTimestampDeps) * barWidth);
@@ -492,7 +495,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   }
 
   if (cooldownDeps.size > 0) {
-    if (!isStderrTTY) {
+    if (!quietMode && !isStderrTTY) {
       stderr.write("Fetching timestamps...\n");
     }
 
@@ -574,13 +577,6 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   let interactiveSelectedDecisions: Decision[] | null = null;
 
   if (args.json) {
-    const humanOutput = renderTable(
-      decisions,
-      args.verboseLevel,
-      projectRoot,
-      args.upgrade,
-    );
-    stderr.write(humanOutput + "\n");
     const jsonOutput = renderJson(decisions);
     stdout.write(jsonOutput + "\n");
   } else if (args.interactive) {
