@@ -191,7 +191,9 @@ describe("parseArgs", () => {
 
     expect(result).toEqual({
       ok: true,
-      args: expect.objectContaining({ include: ["group1:name1", "group2:name2", "group3:name3"] }),
+      args: expect.objectContaining({
+        include: ["group1:name1", "group2:name2", "group3:name3"],
+      }),
     });
   });
 
@@ -205,11 +207,18 @@ describe("parseArgs", () => {
   });
 
   it("mixes comma-separated and repeated --include flags", () => {
-    const result = parseArgs(["--include", "group1:name1,group2:name2", "--include", "group3:name3"]);
+    const result = parseArgs([
+      "--include",
+      "group1:name1,group2:name2",
+      "--include",
+      "group3:name3",
+    ]);
 
     expect(result).toEqual({
       ok: true,
-      args: expect.objectContaining({ include: ["group1:name1", "group2:name2", "group3:name3"] }),
+      args: expect.objectContaining({
+        include: ["group1:name1", "group2:name2", "group3:name3"],
+      }),
     });
   });
 
@@ -218,7 +227,9 @@ describe("parseArgs", () => {
 
     expect(result).toEqual({
       ok: true,
-      args: expect.objectContaining({ include: ["group1:name1", "group2:name2", "group3:name3"] }),
+      args: expect.objectContaining({
+        include: ["group1:name1", "group2:name2", "group3:name3"],
+      }),
     });
   });
 
