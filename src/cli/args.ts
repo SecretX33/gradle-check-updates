@@ -26,8 +26,13 @@ const VALID_TARGETS = ["major", "minor", "patch"] as const;
 
 function normalizeToStringArray(value: unknown): string[] {
   if (value === undefined) return [];
-  if (Array.isArray(value)) return value.map(String);
-  return [String(value)];
+  const rawItems = Array.isArray(value) ? value.map(String) : [String(value)];
+  return rawItems.flatMap((item) =>
+    item
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
+  );
 }
 
 export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResult {
