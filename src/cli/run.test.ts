@@ -58,7 +58,7 @@ function buildArgs(overrides: Partial<ParsedArgs> = {}): ParsedArgs {
     exclude: [],
     json: false,
     errorOnOutdated: false,
-    verbose: false,
+    verboseLevel: 0,
     concurrency: 5,
     noCache: false,
     clearCache: false,
@@ -417,7 +417,7 @@ describe("run() — cooldown", () => {
     } as unknown as NodeJS.WritableStream;
 
     const exitCode = await run(
-      buildArgs({ directory: tempDir, cooldown: 7, verbose: true }),
+      buildArgs({ directory: tempDir, cooldown: 7, verboseLevel: 1 }),
       {
         stdout: fakeStdout,
         stderr: fakeStderr,

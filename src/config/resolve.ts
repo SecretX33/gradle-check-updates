@@ -17,6 +17,7 @@ export class ConfigResolver {
     projectRoot: string,
     private readonly userConfig: ProjectConfig | undefined,
     private readonly onConfigLoaded?: (configPath: string, config: ProjectConfig) => void,
+    private readonly onConfigError?: (configPath: string, error: Error) => void,
   ) {
     this.projectRoot = projectRoot;
   }
@@ -73,6 +74,12 @@ export class ConfigResolver {
         return config;
       } catch (err) {
         if ((err as NodeJS.ErrnoException).code === "ENOENT") continue;
+        // JSON syntax errors are treated as warnings — the file is skipped but the run
+        // continues. This handles cases like JSON5/JSONC comments or trailing commas.
+        if (err instanceof SyntaxError) {
+          this.onConfigError?.(configPath, err);
+          continue;
+        }
         throw err;
       }
     }

@@ -154,7 +154,7 @@ describe("renderTable", () => {
         ),
       ];
 
-      const output = renderTable(decisions, false, "/projects/myapp");
+      const output = renderTable(decisions, 0, "/projects/myapp");
 
       expect(output).toContain("Checking gradle/libs.versions.toml");
       expect(output).not.toContain("/projects/myapp");
@@ -228,7 +228,7 @@ describe("renderTable", () => {
         makeUpgrade("com.example", "lib", "3.2.0", "3.2.5", "build.gradle.kts"),
       ];
 
-      expect(renderTable(decisions, true)).toContain("(patch)");
+      expect(renderTable(decisions, 1)).toContain("(patch)");
     });
 
     it("shows minor annotation with verbose=true", () => {
@@ -236,7 +236,7 @@ describe("renderTable", () => {
         makeUpgrade("com.example", "lib", "4.11.0", "4.12.0", "build.gradle.kts"),
       ];
 
-      expect(renderTable(decisions, true)).toContain("(minor)");
+      expect(renderTable(decisions, 1)).toContain("(minor)");
     });
 
     it("shows major annotation with verbose=true", () => {
@@ -244,7 +244,7 @@ describe("renderTable", () => {
         makeUpgrade("com.example", "lib", "2.3.5", "3.0.1", "build.gradle.kts"),
       ];
 
-      expect(renderTable(decisions, true)).toContain("(major)");
+      expect(renderTable(decisions, 1)).toContain("(major)");
     });
   });
 
@@ -265,7 +265,7 @@ describe("renderTable", () => {
         },
       ];
 
-      const output = renderTable(decisions, true);
+      const output = renderTable(decisions, 1);
 
       expect(output).toContain("io.ktor:ktor-server-core");
       expect(output).toContain("held by --target");
@@ -288,7 +288,7 @@ describe("renderTable", () => {
         },
       ];
 
-      const output = renderTable(decisions, true);
+      const output = renderTable(decisions, 1);
 
       expect(output).toContain("io.ktor:ktor-server-core");
       expect(output).toContain("3.0.1");
@@ -311,7 +311,7 @@ describe("renderTable", () => {
         },
       ];
 
-      const output = renderTable(decisions, true);
+      const output = renderTable(decisions, 1);
 
       expect(output).toContain("1 upgrade available");
       expect(output).toContain("1 held by --target");
@@ -351,7 +351,7 @@ describe("renderTable", () => {
         },
       ];
 
-      const output = renderTable(decisions, true);
+      const output = renderTable(decisions, 1);
       const upgradePos = output.indexOf("zzz.last");
       const heldPos = output.indexOf("aaa.first");
       const cooldownPos = output.indexOf("mmm.middle");
@@ -375,9 +375,9 @@ describe("renderTable", () => {
       ];
 
       // In non-verbose mode: the row is visible but no per-row annotation
-      expect(renderTable(decisions, false)).not.toContain("(held by --target)");
+      expect(renderTable(decisions, 0)).not.toContain("(held by --target)");
       // In verbose mode: per-row annotation appears in parentheses
-      expect(renderTable(decisions, true)).toContain("(held by --target)");
+      expect(renderTable(decisions, 1)).toContain("(held by --target)");
     });
   });
 
@@ -511,7 +511,7 @@ describe("renderTable", () => {
         },
       ];
 
-      expect(renderTable(decisions, true)).toContain("1 held by cooldown");
+      expect(renderTable(decisions, 1)).toContain("1 held by cooldown");
     });
 
     it("includes 'Run with -u to apply.' when there are upgrades", () => {
@@ -529,7 +529,7 @@ describe("renderTable", () => {
         makeUpgrade("com.example", "lib", "1.0.0", "1.1.0", "build.gradle.kts"),
       ];
 
-      const output = renderTable(decisions, false, undefined, true);
+      const output = renderTable(decisions, 0, undefined, true);
       expect(output).not.toContain("Run with");
       expect(output).toContain("1 upgrade applied");
     });
@@ -540,7 +540,7 @@ describe("renderTable", () => {
         makeUpgrade("com.example", "other", "2.0.0", "3.0.0", "build.gradle.kts"),
       ];
 
-      const output = renderTable(decisions, false, undefined, true);
+      const output = renderTable(decisions, 0, undefined, true);
       expect(output).not.toContain("Run with");
       expect(output).toContain("2 upgrades applied");
     });
@@ -550,7 +550,7 @@ describe("renderTable", () => {
         makeUpgrade("com.example", "lib", "1.0.0", "1.1.0", "build.gradle.kts"),
       ];
 
-      const output = renderTable(decisions, false, undefined, false);
+      const output = renderTable(decisions, 0, undefined, false);
       expect(output).toContain("1 upgrade available");
       expect(output).toMatch(/Run with (?:\x1b\[[^m]*m)?-u(?:\x1b\[[^m]*m)? to apply\./u);
     });
@@ -622,7 +622,7 @@ describe("renderTable", () => {
         },
       ];
 
-      const output = renderTable(decisions, false, undefined, true);
+      const output = renderTable(decisions, 0, undefined, true);
       expect(output).toContain("1 downgrade applied");
       expect(output).not.toContain("Run with");
     });
@@ -643,7 +643,7 @@ describe("renderTable", () => {
         },
       ];
 
-      const output = renderTable(decisions, false, undefined, true);
+      const output = renderTable(decisions, 0, undefined, true);
       expect(output).toContain("1 upgrade, 1 downgrade applied");
       expect(output).not.toContain("Run with");
     });
@@ -714,6 +714,178 @@ describe("renderTable", () => {
       ];
 
       expect(renderTable(decisions)).toContain("0 upgrades available");
+    });
+  });
+
+  describe("verbose level 2 (super verbose)", () => {
+    function makeNoChange(
+      group: string,
+      artifact: string,
+      currentRaw: string,
+      file: string,
+    ): Decision {
+      return {
+        occurrence: makeOccurrence({ group, artifact, currentRaw, file }),
+        status: "no-change",
+      };
+    }
+
+    it("hides no-change rows at level 0 and level 1", () => {
+      const decisions: Decision[] = [
+        makeNoChange("tools.jackson", "jackson-bom", "3.0.0", "build.gradle.kts"),
+      ];
+      expect(renderTable(decisions, 0)).not.toContain("jackson-bom");
+      expect(renderTable(decisions, 1)).not.toContain("jackson-bom");
+    });
+
+    it("shows no-change rows at level 2 with current version on both sides", () => {
+      const decisions: Decision[] = [
+        makeNoChange("tools.jackson", "jackson-bom", "3.0.0", "build.gradle.kts"),
+      ];
+      const output = renderTable(decisions, 2);
+      expect(output).toContain("tools.jackson:jackson-bom");
+      expect(output).toContain("(up to date)");
+      // Both columns show 3.0.0 (one current, one new) — count occurrences.
+      const matches = output.match(/3\.0\.0/g) ?? [];
+      expect(matches.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it("shows report-only rows at level 2 with annotation", () => {
+      const decisions: Decision[] = [
+        {
+          occurrence: makeOccurrence({
+            group: "com.example",
+            artifact: "snap-lib",
+            currentRaw: "1.0.0-SNAPSHOT",
+            file: "build.gradle.kts",
+            shape: "snapshot",
+          }),
+          status: "report-only",
+        },
+      ];
+      expect(renderTable(decisions, 1)).not.toContain("snap-lib");
+      const output = renderTable(decisions, 2);
+      expect(output).toContain("snap-lib");
+      expect(output).toContain("(report-only)");
+    });
+
+    it("includes 'up to date' summary count at level 2 only", () => {
+      const decisions: Decision[] = [
+        makeNoChange("a", "b", "1.0.0", "build.gradle.kts"),
+        makeNoChange("c", "d", "2.0.0", "build.gradle.kts"),
+      ];
+      expect(renderTable(decisions, 0)).not.toContain("up to date");
+      expect(renderTable(decisions, 1)).not.toContain("up to date");
+      expect(renderTable(decisions, 2)).toContain("2 up to date");
+    });
+
+    it("excluded rows are hidden at level 0", () => {
+      const decisions: Decision[] = [
+        {
+          occurrence: makeOccurrence({
+            group: "tools.jackson",
+            artifact: "jackson-bom",
+            currentRaw: "3.0.0",
+            file: "build.gradle.kts",
+          }),
+          status: "no-change",
+          reason: "excluded",
+          latestAvailable: "3.1.2",
+        },
+      ];
+      expect(renderTable(decisions, 0)).not.toContain("jackson-bom");
+    });
+
+    it("excluded rows are visible at level 1", () => {
+      const decisions: Decision[] = [
+        {
+          occurrence: makeOccurrence({
+            group: "tools.jackson",
+            artifact: "jackson-bom",
+            currentRaw: "3.0.0",
+            file: "build.gradle.kts",
+          }),
+          status: "no-change",
+          reason: "excluded",
+          latestAvailable: "3.1.2",
+        },
+      ];
+      const output = renderTable(decisions, 1);
+      expect(output).toContain("tools.jackson:jackson-bom");
+    });
+
+    it("excluded rows show currentRaw on both sides (not latestAvailable)", () => {
+      const decisions: Decision[] = [
+        {
+          occurrence: makeOccurrence({
+            group: "tools.jackson",
+            artifact: "jackson-bom",
+            currentRaw: "3.0.0",
+            file: "build.gradle.kts",
+          }),
+          status: "no-change",
+          reason: "excluded",
+          latestAvailable: "3.1.2",
+        },
+      ];
+      const output = renderTable(decisions, 1);
+      // Left column: 3.0.0; right column must NOT show 3.1.2
+      expect(output).not.toContain("3.1.2");
+      const matches = output.match(/3\.0\.0/g) ?? [];
+      expect(matches.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it("excluded rows show (excluded) annotation, not (up to date)", () => {
+      const decisions: Decision[] = [
+        {
+          occurrence: makeOccurrence({
+            group: "tools.jackson",
+            artifact: "jackson-bom",
+            currentRaw: "3.0.0",
+            file: "build.gradle.kts",
+          }),
+          status: "no-change",
+          reason: "excluded",
+          latestAvailable: "3.1.2",
+        },
+      ];
+      const output = renderTable(decisions, 1);
+      expect(output).toContain("(excluded)");
+      expect(output).not.toContain("(up to date)");
+    });
+
+    it("excluded count appears in summary at level 1, up-to-date only at level 2", () => {
+      const decisions: Decision[] = [
+        {
+          occurrence: makeOccurrence({
+            group: "tools.jackson",
+            artifact: "jackson-bom",
+            currentRaw: "3.0.0",
+            file: "build.gradle.kts",
+          }),
+          status: "no-change",
+          reason: "excluded",
+          latestAvailable: "3.1.2",
+        },
+        makeNoChange("com.example", "up-to-date-lib", "1.0.0", "build.gradle.kts"),
+      ];
+      expect(renderTable(decisions, 0)).not.toContain("excluded");
+      expect(renderTable(decisions, 1)).toContain("1 excluded");
+      expect(renderTable(decisions, 1)).not.toContain("up to date");
+      expect(renderTable(decisions, 2)).toContain("1 excluded");
+      expect(renderTable(decisions, 2)).toContain("1 up to date");
+    });
+
+    it("orders no-change rows after upgrades within a file section", () => {
+      const decisions: Decision[] = [
+        makeNoChange("z.holder", "held-bom", "3.0.0", "build.gradle.kts"),
+        makeUpgrade("a.lib", "active", "1.0.0", "1.1.0", "build.gradle.kts"),
+      ];
+      const output = renderTable(decisions, 2);
+      const upgradeIndex = output.indexOf("a.lib:active");
+      const heldIndex = output.indexOf("z.holder:held-bom");
+      expect(upgradeIndex).toBeGreaterThan(-1);
+      expect(heldIndex).toBeGreaterThan(upgradeIndex);
     });
   });
 });

@@ -19,7 +19,7 @@ describe("parseArgs", () => {
         exclude: [],
         json: false,
         errorOnOutdated: false,
-        verbose: false,
+        verboseLevel: 0,
         concurrency: 5,
         noCache: false,
         clearCache: false,
@@ -263,5 +263,53 @@ describe("parseArgs", () => {
       ok: true,
       args: expect.objectContaining({ clearCache: true }),
     });
+  });
+
+  it("--verbose alone is verbose level 1", () => {
+    const result = parseArgs(["--verbose"]);
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({ verboseLevel: 1 }),
+    });
+  });
+
+  it("--verbose 1 is verbose level 1", () => {
+    const result = parseArgs(["--verbose", "1"]);
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({ verboseLevel: 1 }),
+    });
+  });
+
+  it("--verbose 2 is verbose level 2", () => {
+    const result = parseArgs(["--verbose", "2"]);
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({ verboseLevel: 2 }),
+    });
+  });
+
+  it("returns error for --verbose 3", () => {
+    const result = parseArgs(["--verbose", "3"]);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/verbose/i);
+    }
+  });
+
+  it("returns error for --verbose 0", () => {
+    const result = parseArgs(["--verbose", "0"]);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/verbose/i);
+    }
+  });
+
+  it("returns error for non-numeric --verbose value", () => {
+    const result = parseArgs(["--verbose", "foo"]);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/verbose/i);
+    }
   });
 });

@@ -133,7 +133,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     }
     throw error;
   }
-  if (args.verbose && userConfig !== undefined) {
+  if (args.verboseLevel >= 1 && userConfig !== undefined) {
     stderr.write(`Loaded global config: ${join(gcuHome, "config.json")}\n`);
   }
 
@@ -147,7 +147,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     }
     throw error;
   }
-  if (args.verbose && credentials.size > 0) {
+  if (args.verboseLevel >= 1 && credentials.size > 0) {
     stderr.write(
       `Loaded credentials for ${credentials.size} ${credentials.size === 1 ? "repository" : "repositories"}\n`,
     );
@@ -156,7 +156,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   const configResolver = new ConfigResolver(
     projectRoot,
     userConfig,
-    args.verbose
+    args.verboseLevel >= 1
       ? (configPath, config) => {
           stderr.write(`Found config file: ${configPath}\n`);
           const entries = Object.entries(config).filter(
@@ -167,6 +167,11 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
           }
         }
       : undefined,
+    (configPath, error) => {
+      stderr.write(
+        `gcu: warning: could not load config file ${configPath}: ${(error as Error).message}\n`,
+      );
+    },
   );
 
   // ── File scanning phase (walk + parse) ──────────────────────────────────────
@@ -174,7 +179,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   let spinnerFrameIndex = 0;
   let spinnerInterval: ReturnType<typeof setInterval> | null = null;
 
-  if (isStderrTTY && !args.verbose) {
+  if (isStderrTTY && args.verboseLevel === 0) {
     // In TTY non-verbose mode: animated braille spinner on its own line.
     // Initial write has no \r so it appears cleanly; subsequent updates use \x1b[2K\r to
     // erase and rewrite the same line.
@@ -236,7 +241,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     }
     allOccurrences.push(...fileOccurrences);
 
-    if (args.verbose) {
+    if (args.verboseLevel >= 1) {
       const relPath = relative(projectRoot, buildFile).replace(/\\/g, "/");
       const count = fileOccurrences.length;
       stderr.write(
@@ -289,7 +294,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     }
   }
 
-  if (args.verbose) {
+  if (args.verboseLevel >= 1) {
     const fileCount = new Set(policyOccurrences.map((occurrence) => occurrence.file))
       .size;
     const depCount = uniqueDependencies.size;
@@ -309,7 +314,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
 
   if (args.clearCache) {
     await rm(cacheDir, { recursive: true, force: true });
-    if (args.verbose) stderr.write("Cache cleared.\n");
+    if (args.verboseLevel >= 1) stderr.write("Cache cleared.\n");
   }
 
   const cache = new Cache(join(cacheDir, "metadata"));
@@ -317,7 +322,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     cache,
     credentials,
     noCache: args.noCache,
-    verbose: args.verbose,
+    verbose: args.verboseLevel >= 1,
     stderr: stderrForClient,
   };
 
@@ -569,7 +574,12 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   let interactiveSelectedDecisions: Decision[] | null = null;
 
   if (args.json) {
-    const humanOutput = renderTable(decisions, args.verbose, projectRoot, args.upgrade);
+    const humanOutput = renderTable(
+      decisions,
+      args.verboseLevel,
+      projectRoot,
+      args.upgrade,
+    );
     stderr.write(humanOutput + "\n");
     const jsonOutput = renderJson(decisions);
     stdout.write(jsonOutput + "\n");
@@ -582,7 +592,12 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
       throw error;
     }
   } else {
-    const tableOutput = renderTable(decisions, args.verbose, projectRoot, args.upgrade);
+    const tableOutput = renderTable(
+      decisions,
+      args.verboseLevel,
+      projectRoot,
+      args.upgrade,
+    );
     stdout.write(tableOutput + "\n");
   }
 

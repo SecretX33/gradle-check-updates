@@ -21,7 +21,7 @@ function buildArgs(overrides: Partial<ParsedArgs> = {}): ParsedArgs {
     exclude: [],
     json: false,
     errorOnOutdated: false,
-    verbose: false,
+    verboseLevel: 0,
     concurrency: 5,
     noCache: false,
     clearCache: false,
@@ -148,5 +148,38 @@ describe("run() with invalid .gcu.json", () => {
     });
 
     expect(exitCode).toBe(2);
+  });
+
+  it("warns and continues when .gcu.json contains invalid JSON syntax", async () => {
+    await writeFile(
+      join(tempDir, ".gcu.json"),
+      `{ target: "minor" }`, // JSON5-style unquoted key — not valid JSON
+      "utf8",
+    );
+
+    await writeFile(
+      join(tempDir, "build.gradle.kts"),
+      `dependencies {\n    implementation("com.example:lib:1.0.0")\n}\n`,
+      "utf8",
+    );
+
+    mockRepo({
+      "https://repo.maven.apache.org/maven2/com/example/lib/maven-metadata.xml": `<?xml version="1.0"?><metadata><groupId>com.example</groupId><artifactId>lib</artifactId><versioning><versions><version>1.0.0</version></versions></versioning></metadata>`,
+      "https://maven.google.com/com/example/lib/maven-metadata.xml": `<?xml version="1.0"?><metadata><groupId>com.example</groupId><artifactId>lib</artifactId><versioning><versions><version>1.0.0</version></versions></versioning></metadata>`,
+      "https://plugins.gradle.org/m2/com/example/lib/maven-metadata.xml": `<?xml version="1.0"?><metadata><groupId>com.example</groupId><artifactId>lib</artifactId><versioning><versions><version>1.0.0</version></versions></versioning></metadata>`,
+    });
+
+    const stdout = makeWritable();
+    const stderr = makeWritable();
+
+    const exitCode = await run(buildArgs({ directory: tempDir }), {
+      stdout: stdout.stream,
+      stderr: stderr.stream,
+    });
+
+    // Must not crash — warning is emitted and the run continues.
+    expect(exitCode).not.toBe(3);
+    expect(stderr.output).toMatch(/warning.*could not load config/i);
+    expect(stderr.output).toContain(".gcu.json");
   });
 });

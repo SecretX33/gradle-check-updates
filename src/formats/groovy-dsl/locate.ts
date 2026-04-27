@@ -241,6 +241,29 @@ export function locateGroovy(file: string, contents: string): Occurrence[] {
         lookAhead++;
       }
 
+      // Unwrap optional `platform(...)` / `enforcedPlatform(...)` wrapper.
+      // Groovy admits both `<config> platform 'g:a:v'` and
+      // `<config>(platform('g:a:v'))`, so accept the wrapper with or without
+      // its own parens, then fall through with `lookAhead` pointed at the
+      // inner GAV string.
+      const wrapperCandidate = tokens[lookAhead];
+      if (
+        wrapperCandidate?.kind === "ident" &&
+        (wrapperCandidate.text === "platform" ||
+          wrapperCandidate.text === "enforcedPlatform")
+      ) {
+        let unwrapIndex = lookAhead + 1;
+        if (
+          tokens[unwrapIndex]?.kind === "punct" &&
+          (tokens[unwrapIndex] as Extract<GroovyToken, { kind: "punct" }>).text === "("
+        ) {
+          unwrapIndex++;
+        }
+        if (tokens[unwrapIndex]?.kind === "string") {
+          lookAhead = unwrapIndex;
+        }
+      }
+
       const argToken = tokens[lookAhead];
       if (argToken?.kind === "string") {
         const occurrence = emitFromGavString(
