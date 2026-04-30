@@ -2,7 +2,7 @@
   "name": "gradle-check-updates",
   "type": "module",
   "version": "0.0.0",
-  "description": "Upgrade Gradle dependencies to their latest versions",
+  "description": "The missing dependency updater for Gradle. Fast, byte-precise, and security-focused CLI to upgrade dependencies in Kotlin/Groovy DSLs, Version Catalogs, and gradle.properties.",
   "author": "SecretX33 <notyetmidnight@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/SecretX33/gradle-check-updates#readme",
@@ -13,6 +13,33 @@
   "bugs": {
     "url": "https://github.com/SecretX33/gradle-check-updates/issues"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/SecretX33"
+  },
+  "keywords": [
+    "gradle",
+    "gcu",
+    "cli",
+    "dependencies",
+    "dependency-management",
+    "dependency-updater",
+    "update-checker",
+    "version-catalog",
+    "outdated",
+    "kotlin",
+    "kotlin-dsl",
+    "groovy",
+    "groovy-dsl",
+    "maven",
+    "android",
+    "security",
+    "supply-chain",
+    "cooldown"
+  ],
   "bin": {
     "gcu": "dist/index.js",
     "gradle-check-updates": "dist/index.js"
@@ -26,21 +53,10 @@
     "README.md",
     "LICENSE"
   ],
-  "keywords": [
-    "gradle",
-    "gcu",
-    "cli",
-    "dependencies",
-    "dependency-updater",
-    "update-checker",
-    "dependency-checker",
-    "version-catalog",
-    "outdated",
-    "kotlin",
-    "groovy",
-    "maven"
-  ],
   "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "build": "tsdown",
     "dev": "tsdown --watch --env.NODE_ENV=development",
     "start": "node dist/index.js",
@@ -65,6 +81,8 @@
     "prettier": "3.8.3",
     "tsdown": "0.21.9",
     "typescript": "6.0.3",
-    "vitest": "4.1.4"
+    "vitepress": "1.6.4",
+    "vitest": "4.1.4",
+    "vue": "3.5.33"
   }
 }

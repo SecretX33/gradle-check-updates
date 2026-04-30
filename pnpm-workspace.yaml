@@ -6,13 +6,14 @@ trustPolicy: no-downgrade # Blocks installation when a package version has weake
 blockExoticSubdeps: true # Prevent installation of exotic subdependencies (e.g., git repositories, local paths, etc.). See: https://pnpm.io/blog/releases/10.26#blockexoticsubdeps
 
 ## Configure build script execution permission. Explicitly allows (true) or disallows (false) script execution per package
-# allowBuilds:
-# esbuild: true # Optimizes out the JavaScript shim by the actual native binary for faster builds (https://github.com/evanw/esbuild/issues/4085)
+allowBuilds:
+  esbuild: false # Optimizes out the JavaScript shim by the actual native binary for faster builds (https://github.com/evanw/esbuild/issues/4085)
 
 # When applying certain hotfixed packages, uncomment this and list them here to exempt them from the minimumReleaseAge control
 # minimumReleaseAgeExclude:
 #  - package-with-critical-hotfix@1.2.3
 
 # When applying certain packages that have migrated their CI/CD to a less secure system, uncomment this and list them here to exempt them from the trustPolicy control
-#trustPolicyExclude:
+trustPolicyExclude:
+  - vite@5.4.21
 #  - vite@6.4.1

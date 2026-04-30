@@ -1,6 +1,22 @@
-# gradle-check-updates
+# gradle-check-updates (`gcu`)
 
-gradle-check-updates is a command-line tool for upgrading Gradle dependencies.
+[![npm version](https://img.shields.io/npm/v/gradle-check-updates.svg)](https://www.npmjs.com/package/gradle-check-updates)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://github.com/SecretX33/gradle-check-updates/actions/workflows/ci.yml/badge.svg)](https://github.com/SecretX33/gradle-check-updates/actions/workflows/ci.yml)
+
+**The missing dependency updater for Gradle.** Fast, byte-precise, and security-focused CLI to upgrade dependencies across your entire Gradle project.
+
+gradle-check-updates (`gcu`) scans your project for outdated dependencies and plugins, fetches the latest versions from Maven repositories, and applies updates directly to your build files—all while preserving your formatting and comments exactly.
+
+## Features
+
+- ⚡ **Lightning Fast:** Queries Maven repositories directly, bypassing slow Gradle daemon overhead.
+- 🎯 **Byte-Precise:** Only the version string changes. No reformatting, no comment loss, no indentation mess.
+- 📦 **Comprehensive Support:** Works with Kotlin DSL (`build.gradle.kts`), Groovy DSL (`build.gradle`), Version Catalogs (`libs.versions.toml`), and `gradle.properties`.
+- 🏗️ **Multi-Module Ready:** Handles complex project structures and shared variables in one pass.
+- 🛡️ **Security-First:** Built-in **cooldown window** to protect against supply-chain attacks.
+- 🛠️ **Configurable:** Fine-grained control with `--target` (major/minor/patch), `--include`/`--exclude` filters, and per-directory configuration.
+- 🖥️ **Interactive Mode:** A beautiful TUI to selectively apply upgrades.
 
 ## Install
 
@@ -227,6 +243,33 @@ With the above file, `gcu` reads `process.env.NEXUS_TOKEN`, `process.env.ARTIFAC
 | `3` | Project file parse error |
 | `4` | Network / repository error |
 | `5` | Rich-block coherence conflict prevented a rewrite |
+
+## Why gcu?
+
+| Feature | `gcu` | `gradle-versions-plugin` | IntelliJ / IDE |
+|---|:---:|:---:|:---:|
+| **Speed** | ⚡ Instant | 🐢 Slow (runs via Gradle) | Variable |
+| **Write support** | ✅ Yes (`-u`) | ❌ No (Report only) | ✅ Manual |
+| **Byte-precise** | ✅ Yes | N/A | ❌ Often reformats |
+| **Multi-module** | ✅ Native | ✅ Yes | ❌ Per-file |
+| **CI Friendly** | ✅ Yes | ✅ Yes | ❌ No |
+| **Cooldown Window** | ✅ Yes | ❌ No | ❌ No |
+
+`gcu` is designed to be the Gradle equivalent of [`npm-check-updates`](https://github.com/raineorshine/npm-check-updates). It doesn't replace the `gradle-versions-plugin` for deep build analysis, but it's the better tool for the daily "just upgrade my stuff" workflow.
+
+## FAQ
+
+### Does it support Kotlin DSL?
+Yes, `gcu` has full support for `build.gradle.kts` and `settings.gradle.kts`.
+
+### Does it mess up my formatting?
+No. `gcu` uses a byte-precise rewriter that only touches the version string. Your comments, blank lines, and indentation are preserved exactly.
+
+### Can I use it in CI?
+Absolutely. Use `--error-on-outdated` to fail the build if updates are available, or use it to automate dependency PRs.
+
+### Where does it fetch versions from?
+It parses your `repositories { }` blocks and queries them directly. It also supports private repositories via `~/.gcu/credentials.json`.
 
 ## License
 
