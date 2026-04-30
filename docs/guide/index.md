@@ -1,18 +1,16 @@
 # Getting Started
 
-`gradle-check-updates` (`gcu`) is a command-line tool for upgrading Gradle dependencies. 
-
-It is designed to be the Gradle equivalent of `npm-check-updates`. It scans your project for outdated dependencies and plugins, fetches the latest versions from Maven repositories, and applies updates directly to your build files—all while preserving your formatting and comments exactly.
+`gradle-check-updates` (or `gcu`) is a command-line tool designed to be the Gradle equivalent of `npm-check-updates`. It safely and automatically upgrades your dependencies to their latest versions.
 
 ## Installation
 
-Install globally to use `gradle-check-updates` (or the `gcu` shorthand):
+Install globally via npm to make the `gcu` command available everywhere:
 
 ```sh
 npm install -g gradle-check-updates
 ```
 
-Or run with `npx` without installing:
+Alternatively, you can run it on-the-fly using `npx`:
 
 ```sh
 npx gradle-check-updates
@@ -20,39 +18,44 @@ npx gradle-check-updates
 
 ## Quick Start
 
-Navigate to your Gradle project directory and run the tool.
+Open your terminal, navigate to your Gradle project directory, and run one of the following commands:
 
-### Preview available upgrades
+### 1. Preview upgrades (Dry Run)
 
-Running `gcu` without flags will print a report of what *can* be upgraded, but will not modify your files.
+Run `gcu` by itself. It will scan your project and print a report of available upgrades, but **it will not modify any files**.
 
 ```sh
 gcu
 ```
 
-![Dry-run](./images/dry_run.png)
+![Dry-run](../images/dry_run.png)
 
-### Apply upgrades
+### 2. Apply upgrades
 
-Use the `-u` or `--upgrade` flag to write changes to disk.
+Add the `-u` (or `--upgrade`) flag to actually write the changes to your build files.
 
 ```sh
 gcu -u
 ```
 
-![Update run](./images/update_run.png)
+![Update run](../images/update_run.png)
 
-### Interactive mode
+### 3. Choose upgrades interactively
 
-Use the `-i` or `--interactive` flag to launch a TUI picker to choose exactly which dependencies to upgrade.
+Add the `-i` (or `--interactive`) flag to launch a visual picker, allowing you to select exactly which dependencies you want to upgrade.
 
 ```sh
 gcu -i
 ```
 
-![Interactive run](./images/interactive_run.png)
+![Interactive run](../images/interactive_run.png)
 
 ## What's Next?
 
-- Explore the [Architecture and Design](./BOOTSTRAP.md) to understand how `gcu` achieves byte-precise editing.
-- Check out the [README on GitHub](https://github.com/SecretX33/gradle-check-updates) for full configuration options and flags.
+Learn more about how to use `gcu` effectively:
+
+- [**How it Works**](./how-it-works) - Understand the upgrade policy and supported files.
+- [**Command Line Options**](./options) - Full list of flags and exit codes.
+- [**Cooldown & Security**](./cooldown) - Using the cooldown window to protect your supply chain.
+- [**Configuration**](./configuration) - Layered configuration with `.gcu.json`.
+- [**Repository Auth**](./authentication) - Authenticating with private Maven repositories.

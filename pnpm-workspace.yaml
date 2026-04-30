@@ -16,4 +16,3 @@ allowBuilds:
 # When applying certain packages that have migrated their CI/CD to a less secure system, uncomment this and list them here to exempt them from the trustPolicy control
 trustPolicyExclude:
   - vite@5.4.21
-#  - vite@6.4.1

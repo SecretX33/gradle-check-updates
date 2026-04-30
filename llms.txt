@@ -1,0 +1,27 @@
+# gradle-check-updates
+
+The missing dependency updater for Gradle. Fast, byte-precise, and security-focused CLI to upgrade dependencies in Kotlin/Groovy DSLs, Version Catalogs, and gradle.properties.
+
+## Key Information
+- **Main Website**: https://secretx33.github.io/gradle-check-updates/
+- **Source Code**: https://github.com/SecretX33/gradle-check-updates
+- **npm Package**: https://www.npmjs.com/package/gradle-check-updates
+
+## Features
+- **Byte-Precise**: Only version strings are modified. No reformatting or comment loss.
+- **Fast**: Queries Maven repositories directly, bypassing Gradle daemon overhead.
+- **Comprehensive**: Supports Kotlin DSL, Groovy DSL, Version Catalogs, and gradle.properties.
+- **Security-First**: Built-in cooldown window to protect against supply-chain attacks.
+
+## Core Commands
+- `gcu`: Preview available upgrades (dry-run).
+- `gcu -u`: Apply upgrades to build files.
+- `gcu -i`: Launch interactive TUI picker.
+- `gcu --cooldown 7`: Skip versions published in the last 7 days.
+
+## Documentation Index
+- [Getting Started](https://secretx33.github.io/gradle-check-updates/guide/)
+- [How it Works](https://secretx33.github.io/gradle-check-updates/guide/how-it-works)
+- [Configuration](https://secretx33.github.io/gradle-check-updates/guide/configuration)
+- [Command Line Options](https://secretx33.github.io/gradle-check-updates/guide/options)
+- [Technical Design](https://secretx33.github.io/gradle-check-updates/BOOTSTRAP)

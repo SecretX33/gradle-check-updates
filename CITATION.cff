@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "SecretX33"
+title: "gradle-check-updates"
+version: 0.0.0
+date-released: 2026-04-30
+url: "https://github.com/SecretX33/gradle-check-updates"
+keywords:
+  - gradle
+  - dependency-management
+  - security
+  - supply-chain
+  - kotlin-dsl
+  - groovy-dsl
