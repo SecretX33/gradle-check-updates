@@ -1,4 +1,4 @@
-name: Deploy VitePress site to Pages
+name: Deploy docs to Pages
 
 on:
   workflow_dispatch:
@@ -17,6 +17,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.repository == 'SecretX33/gradle-check-updates'
     runs-on: ubuntu-latest
     name: Build
     steps:
@@ -70,6 +71,7 @@ jobs:
           path: docs/.vitepress/dist
 
   deploy:
+    if: github.repository == 'SecretX33/gradle-check-updates'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
