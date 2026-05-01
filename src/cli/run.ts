@@ -348,7 +348,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
       throw error;
     }
     occurrenceConfigMap.set(occurrence, {
-      target: args.target ?? fileConfig.target,
+      target: args.target ?? fileConfig.target ?? "major",
       pre: args.pre || (fileConfig.pre ?? false),
       cooldownDays: args.cooldown > 0 ? args.cooldown : (fileConfig.cooldown ?? 0),
       allowDowngrade: args.allowDowngrade || (fileConfig.allowDowngrade ?? false),
@@ -358,7 +358,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   }
   const getConfig = (occurrence: Occurrence): PolicyOptions =>
     occurrenceConfigMap.get(occurrence) ?? {
-      target: args.target,
+      target: args.target ?? "major",
       pre: args.pre,
       cooldownDays: args.cooldown,
       allowDowngrade: args.allowDowngrade,

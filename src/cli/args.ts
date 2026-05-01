@@ -4,7 +4,7 @@ export type ParsedArgs = {
   directory: string;
   upgrade: boolean;
   interactive: boolean;
-  target: "major" | "minor" | "patch";
+  target: "major" | "minor" | "patch" | undefined;
   pre: boolean;
   cooldown: number;
   allowDowngrade: boolean;
@@ -43,9 +43,7 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
     .usage("[directory] [options]")
     .option("-u, --upgrade", "Write changes to disk", { default: false })
     .option("-i, --interactive", "TUI picker", { default: false })
-    .option("-t, --target <target>", "Version ceiling: major, minor, or patch", {
-      default: "major",
-    })
+    .option("-t, --target <target>", "Version ceiling: major, minor, or patch")
     .option("--pre", "Allow prereleases as candidates", { default: false })
     .option("-c, --cooldown <days>", "Skip versions newer than N days", { default: 0 })
     .option("--allow-downgrade", "Cooldown escape hatch (requires --cooldown)", {
@@ -89,11 +87,19 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
 
   const directory = typeof args[0] === "string" ? args[0] : ".";
 
-  const target = options["target"] as string;
-  if (!VALID_TARGETS.includes(target as "major" | "minor" | "patch")) {
+  const rawTarget = options["target"];
+  let target: "major" | "minor" | "patch" | undefined;
+  if (rawTarget === undefined) {
+    target = undefined;
+  } else if (
+    typeof rawTarget === "string" &&
+    VALID_TARGETS.includes(rawTarget as "major" | "minor" | "patch")
+  ) {
+    target = rawTarget as "major" | "minor" | "patch";
+  } else {
     return {
       ok: false,
-      error: `Invalid --target value "${target}". Must be one of: major, minor, patch.`,
+      error: `Invalid --target value "${rawTarget}". Must be one of: major, minor, patch.`,
     };
   }
 
@@ -167,7 +173,7 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
       directory,
       upgrade: options["upgrade"] as boolean,
       interactive: options["interactive"] as boolean,
-      target: target as "major" | "minor" | "patch",
+      target,
       pre: options["pre"] as boolean,
       cooldown,
       allowDowngrade,

@@ -11,7 +11,7 @@ describe("parseArgs", () => {
         directory: ".",
         upgrade: false,
         interactive: false,
-        target: "major",
+        target: undefined,
         pre: false,
         cooldown: 0,
         allowDowngrade: false,
