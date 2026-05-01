@@ -2304,7 +2304,7 @@ export const ProjectConfigSchema = z.object({
   allowDowngrade: z.boolean().optional(),
   include: z.array(z.string()).optional(),
   exclude: z.array(z.string()).optional(),
-  repos: z.array(z.string().url()).optional(),
+  repos: z.array(z.url()).optional(),
   noAutoRepos: z.boolean().optional(),
   cacheDir: z.string().optional(),
   noCache: z.boolean().optional(),
@@ -2316,7 +2316,7 @@ export const CredentialEntrySchema = z.union([
   z.object({ token: z.string().min(1) }).strict(),
 ]);
 
-export const CredentialsFileSchema = z.record(z.string().url(), CredentialEntrySchema);
+export const CredentialsFileSchema = z.record(z.url(), CredentialEntrySchema);
 export type CredentialsFile = z.infer<typeof CredentialsFileSchema>;
 ```
 
