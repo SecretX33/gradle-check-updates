@@ -15,6 +15,7 @@ You can place this file in the root of your project to set defaults for everythi
   "target": "minor",
   "pre": false,
   "cooldown": 3,
+  "allowDowngrade": false,
   "include": ["org.springframework.*"],
   "exclude": ["com.example:legacy-*"]
 }
@@ -25,8 +26,11 @@ You can place this file in the root of your project to set defaults for everythi
 | `target` | Version ceiling for upgrades: `major`, `minor`, or `patch` |
 | `pre` | When `true`, allows prerelease versions as upgrade candidates |
 | `cooldown` | Number of days a new version must age before it is considered as a candidate |
+| `allowDowngrade` | If `true`, allows downgrading when the current version is blocked by `cooldown` |
 | `include` | Glob patterns - only matching `group:artifact` entries are upgraded |
 | `exclude` | Glob patterns - matching `group:artifact` entries are skipped |
+| `cacheDir` | Custom directory for the local metadata cache |
+| `noCache` | If `true`, bypasses the local cache and fetches fresh metadata |
 
 ## Multi-Module Overrides
 
