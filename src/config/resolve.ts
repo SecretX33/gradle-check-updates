@@ -43,19 +43,24 @@ export class ConfigResolver {
       if (parentDir === currentDir) break;
       currentDir = parentDir;
     }
+    // Walk outermost → innermost so each step's merged value reflects "configs from this
+    // directory up to projectRoot" — never the deeper inner layers.
+    dirChain.reverse();
 
-    // Walk from outermost (projectRoot end) to innermost (startDir), loading any
-    // .gcu.json found and merging innermost-wins so child settings override parents.
+    // The cache stores a *per-directory* partial merge: cache[dir] = merge of all
+    // .gcu.json files from `dir` up to projectRoot, layered on top of userConfig. Caching
+    // every step keeps siblings cheap while preventing inner layers from leaking upward.
     let merged: ProjectConfig = this.userConfig ?? {};
-    for (const dir of dirChain.reverse()) {
+    for (const dir of dirChain) {
+      const cached = this.directoryCache.get(dir);
+      if (cached !== undefined) {
+        merged = cached;
+        continue;
+      }
       const found = await this.tryLoadConfigAt(dir);
       if (found !== null) {
         merged = { ...merged, ...found };
       }
-    }
-
-    // Cache the result for every directory in the chain so sibling files skip the walk.
-    for (const dir of dirChain) {
       this.directoryCache.set(dir, merged);
     }
 
