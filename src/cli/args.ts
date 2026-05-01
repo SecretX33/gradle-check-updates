@@ -10,7 +10,7 @@ export type ParsedArgs = {
   allowDowngrade: boolean;
   include: string[];
   exclude: string[];
-  json: boolean;
+  format: "text" | "json";
   errorOnOutdated: boolean;
   verboseLevel: 0 | 1 | 2;
   concurrency: number;
@@ -23,6 +23,7 @@ export type ArgsParseResult =
   | { ok: false; error: string };
 
 const VALID_TARGETS = ["major", "minor", "patch"] as const;
+const VALID_FORMATS = ["text", "json"] as const;
 
 function normalizeToStringArray(value: unknown): string[] {
   if (value === undefined) return [];
@@ -52,7 +53,7 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
     })
     .option("--include <pattern>", "Include filter (repeatable)")
     .option("--exclude <pattern>", "Exclude filter (repeatable)")
-    .option("--json", "JSON output mode", { default: false })
+    .option("--format <format>", "Output format: text or json", { default: "text" })
     .option("--error-on-outdated", "Exit 1 when upgrades available but -u not passed", {
       default: false,
     })
@@ -93,6 +94,24 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
     return {
       ok: false,
       error: `Invalid --target value "${target}". Must be one of: major, minor, patch.`,
+    };
+  }
+
+  let format = options["format"] as string;
+
+  // cac doesn't expose a way to hide a flag from --help while keeping it functional, so we
+  // detect the legacy --json flag by scanning raw argv rather than registering it as an option.
+  if (argv.includes("--json")) {
+    process.stderr.write(
+      "gcu: warning: --json is deprecated. Please use --format json instead.\n",
+    );
+    format = "json";
+  }
+
+  if (!VALID_FORMATS.includes(format as "text" | "json")) {
+    return {
+      ok: false,
+      error: `Invalid --format value "${format}". Must be one of: text, json.`,
     };
   }
 
@@ -154,7 +173,7 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
       allowDowngrade,
       include: normalizeToStringArray(options["include"]),
       exclude: normalizeToStringArray(options["exclude"]),
-      json: options["json"] as boolean,
+      format: format as "text" | "json",
       errorOnOutdated: options["errorOnOutdated"] as boolean,
       verboseLevel,
       concurrency,

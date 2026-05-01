@@ -195,7 +195,7 @@ function buildArgs(overrides: Partial<ParsedArgs> = {}): ParsedArgs {
     allowDowngrade: false,
     include: [],
     exclude: [],
-    json: false,
+    format: "text",
     errorOnOutdated: false,
     verboseLevel: 0,
     noCache: false,

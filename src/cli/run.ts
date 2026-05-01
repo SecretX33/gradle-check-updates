@@ -74,7 +74,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   const stdout = options?.stdout ?? process.stdout;
   const stderr = options?.stderr ?? process.stderr;
   const isStderrTTY = Boolean((stderr as NodeJS.WriteStream).isTTY);
-  const quietMode = args.json;
+  const quietMode = args.format === "json";
 
   // Progress bar state — declared early so the stderrForClient closure can reference them.
   let progressActive = false;
@@ -576,7 +576,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
 
   let interactiveSelectedDecisions: Decision[] | null = null;
 
-  if (args.json) {
+  if (args.format === "json") {
     const jsonOutput = renderJson(decisions);
     stdout.write(jsonOutput + "\n");
   } else if (args.interactive) {

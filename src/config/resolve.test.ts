@@ -213,7 +213,9 @@ describe("ConfigResolver — deep-chain (4 levels)", () => {
 
   it("a/ file does not see fields set in a/b or a/b/c", async () => {
     const resolver = new ConfigResolver(fixtureDir, undefined);
-    const resolved = await resolver.resolveForFile(join(fixtureDir, "a/build.gradle.kts"));
+    const resolved = await resolver.resolveForFile(
+      join(fixtureDir, "a/build.gradle.kts"),
+    );
     expect(resolved.target).toBe("minor");
     expect(resolved.cooldown).toBe(5);
     expect(resolved.exclude).toBeUndefined();
@@ -475,9 +477,7 @@ describe("ConfigResolver — robustness", () => {
     const realRoot = join(FIXTURES_ROOT, "submodule-override");
     const projectRoot = join(realRoot, "submodule");
     const resolver = new ConfigResolver(projectRoot, undefined);
-    const resolved = await resolver.resolveForFile(
-      join(projectRoot, "build.gradle.kts"),
-    );
+    const resolved = await resolver.resolveForFile(join(projectRoot, "build.gradle.kts"));
     // Only the submodule .gcu.json (target:patch) is in the chain.
     expect(resolved).toEqual({ target: "patch" });
     // Exactly one disk read — the submodule's .gcu.json. The root one is above projectRoot.
@@ -487,7 +487,9 @@ describe("ConfigResolver — robustness", () => {
   it("onConfigLoaded callback fires for every config successfully read in the chain", async () => {
     const fixtureDir = join(FIXTURES_ROOT, "deep-chain");
     const loaded: string[] = [];
-    const resolver = new ConfigResolver(fixtureDir, undefined, (path) => loaded.push(path));
+    const resolver = new ConfigResolver(fixtureDir, undefined, (path) =>
+      loaded.push(path),
+    );
     await resolver.resolveForFile(join(fixtureDir, "a/b/c/build.gradle.kts"));
     expect(loaded).toHaveLength(4);
     expect(loaded.every((path) => path.endsWith(".gcu.json"))).toBe(true);

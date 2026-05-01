@@ -17,7 +17,7 @@ describe("parseArgs", () => {
         allowDowngrade: false,
         include: [],
         exclude: [],
-        json: false,
+        format: "text",
         errorOnOutdated: false,
         verboseLevel: 0,
         concurrency: 5,
@@ -239,10 +239,42 @@ describe("parseArgs", () => {
     expect(result).toEqual({ ok: true, args: expect.objectContaining({ pre: true }) });
   });
 
-  it("enables --json flag", () => {
+  it("enables --format json flag via --json fallback", () => {
     const result = parseArgs(["--json"]);
 
-    expect(result).toEqual({ ok: true, args: expect.objectContaining({ json: true }) });
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({ format: "json" }),
+    });
+  });
+
+  it("enables --format json flag directly", () => {
+    const result = parseArgs(["--format", "json"]);
+
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({ format: "json" }),
+    });
+  });
+
+  it("accepts --format text explicitly", () => {
+    const result = parseArgs(["--format", "text"]);
+
+    expect(result).toEqual({
+      ok: true,
+      args: expect.objectContaining({ format: "text" }),
+    });
+  });
+
+  it("returns error for invalid --format value", () => {
+    const result = parseArgs(["--format", "yaml"]);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/format/i);
+      expect(result.error).toMatch(/text/);
+      expect(result.error).toMatch(/json/);
+    }
   });
 
   it("enables --error-on-outdated flag", () => {

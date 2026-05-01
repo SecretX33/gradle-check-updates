@@ -30,7 +30,7 @@ All options for `gradle-check-updates` (`gcu`).
 
 | Option                  | Default | Description                                                    |
 |-------------------------|---------|----------------------------------------------------------------|
-| `--json`                | `false` | JSON output mode (human output goes to stderr, JSON to stdout). |
+| `--format <format>`     | `text`  | Output format: `text` or `json`. When `json`, human output goes to stderr and JSON to stdout. |
 | `--error-on-outdated`   | `false` | Exit code 1 when upgrades are available but `-u` was not passed. Excellent for CI gates. |
 | `--verbose [level]`     | `0`     | Verbosity. `--verbose 1` shows held/skipped entries. `--verbose 2` lists *every* detected dependency, including those already at the latest version. |
 
