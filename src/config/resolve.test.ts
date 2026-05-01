@@ -4,7 +4,7 @@ import { ConfigResolver } from "./resolve.js";
 
 const FIXTURES_ROOT = join(
   import.meta.dirname,
-  "../../test/fixtures/projects/multi-config",
+  "../../test/fixtures/projects/multi-config/resolver",
 );
 
 describe("ConfigResolver — root-only", () => {
