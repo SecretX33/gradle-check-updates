@@ -16,6 +16,7 @@ on:
 permissions:
   contents: write
   id-token: write
+  pages: write
 
 jobs:
   release:
@@ -33,3 +34,8 @@ jobs:
       dry_run: ${{ inputs.dry_run }}
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  deploy-docs:
+    if: github.repository == 'SecretX33/gradle-check-updates' && inputs.dry_run != true
+    needs: [release, publish]
+    uses: ./.github/workflows/deploy-docs.yml

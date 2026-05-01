@@ -1,9 +1,8 @@
-name: Deploy VitePress site to Pages
+name: Deploy docs to Pages
 
 on:
-  push:
-    branches: [master]
   workflow_dispatch:
+  workflow_call:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -18,7 +17,9 @@ concurrency:
 
 jobs:
   build:
+    if: github.repository == 'SecretX33/gradle-check-updates'
     runs-on: ubuntu-latest
+    name: Build
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -70,6 +71,7 @@ jobs:
           path: docs/.vitepress/dist
 
   deploy:
+    if: github.repository == 'SecretX33/gradle-check-updates'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
