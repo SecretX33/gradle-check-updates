@@ -13,7 +13,7 @@ Java/Kotlin projects on Gradle have no tool that plays the role `npm-check-updat
 
 **Preserve the user's file exactly.** No reordering. No reformatting. No indentation changes. No comment loss. The only bytes that change are the version string itself. Tests prove this byte-for-byte.
 
-This rules out "parse → AST → regenerate" approaches. The strategy is **byte-precise, in-place string replacement**: each format's locator returns precise byte ranges; a single rewriter swaps just those bytes.
+This rules out "parse → AST → regenerate" approaches. The strategy is **surgical, in-place string replacement**: each format's locator returns precise byte ranges; a single rewriter swaps just those bytes.
 
 ## High-level pipeline
 
@@ -25,7 +25,7 @@ This rules out "parse → AST → regenerate" approaches. The strategy is **byte
 5. Fetch metadata   query each repo for available versions + publish dates
 6. Decide upgrade   apply policy (target, pre, cooldown, filter, skip)
 7. Render report    table (default), JSON (--json), or interactive (-i)
-8. Apply (if -u)    byte-precise rewrite; never reorder or reformat
+8. Apply (if -u)    surgical rewrite; never reorder or reformat
 ```
 
 ## Modules
@@ -43,7 +43,7 @@ This rules out "parse → AST → regenerate" approaches. The strategy is **byte
 | `policy/` | `--target`, `--pre`, `--cooldown`, `--allow-downgrade`, `--include`, `--exclude` |
 | `config/` | Config discovery (per-Occurrence, upward walk), Zod validation, merge precedence |
 | `report/` | Table renderer, JSON renderer, interactive picker |
-| `rewrite/` | Byte-precise file editor — single function, single rule |
+| `rewrite/` | Surgical file editor — single function, single rule |
 | `cli/` | Argument parsing, orchestration |
 | `test/` | Fixtures, integration harness, HTTP mock layer |
 
@@ -585,7 +585,7 @@ gradle-check-updates/
 | Groovy DSL parsing | hand-written tokenizer | We only need string-literal-aware scanning to find specific patterns. Full Groovy parser is overkill. |
 | Kotlin DSL parsing | hand-written tokenizer | Same reasoning. Handle regular strings, raw triple-quoted, line/block comments, `$`-interpolation, balanced braces. |
 
-The version-catalog locator parses TOML by hand — it only needs `[versions]` table extraction with byte-precise locations, which a parser would obscure. No general-purpose TOML library is required.
+The version-catalog locator parses TOML by hand — it only needs `[versions]` table extraction with precise locations, which a parser would obscure. No general-purpose TOML library is required.
 
 ### Dev
 
