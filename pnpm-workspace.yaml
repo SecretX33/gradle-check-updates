@@ -7,7 +7,7 @@ blockExoticSubdeps: true   # Prevent installation of exotic subdependencies (e.g
 
 ## Configure build script execution permission. Explicitly allows (true) or disallows (false) script execution per package
 allowBuilds:
-  esbuild: false  # Optimizes out the JavaScript shim by the actual native binary for faster builds (https://github.com/evanw/esbuild/issues/4085)
+  esbuild: false  # Intentionally disabled — native binary speed gain isn't worth allowing lifecycle scripts (https://github.com/evanw/esbuild/issues/4085)
 
 # When applying certain hotfixed packages, uncomment this and list them here to exempt them from the minimumReleaseAge control
 # minimumReleaseAgeExclude:

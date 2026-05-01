@@ -19,9 +19,9 @@ First off, thank you for considering contributing to `gradle-check-updates`! It'
 ### Pull Requests
 1. Fork the repo and create your branch from `main`.
 2. If you've added code that should be tested, add tests!
-3. If you've changed APIs, update the documentation.
-4. Ensure the test suite passes (`pnpm test`).
-5. Make sure your code lints (`pnpm format`).
+3. Ensure the test suite passes (`pnpm test`).
+4. Reformat code to ensure code lint pass (`pnpm format:write`).
+5. If you've changed APIs, update the documentation (hint: use [`/update-docs`](.claude/skills/updating-docs/SKILL.md) AI skill to help you).
 6. Issue that pull request!
 
 ## Development Setup

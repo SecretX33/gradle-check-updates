@@ -22,7 +22,8 @@ npm-debug.log*
 # Editor directories and files
 .idea/
 .vscode/
-.claude/
+.claude/worktrees
+.claude/settings.local.json
 
 # npm pack artifacts
 *.tgz
