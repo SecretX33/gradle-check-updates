@@ -66,7 +66,7 @@ function buildArgs(directory: string, overrides: Partial<ParsedArgs> = {}): Pars
     directory,
     upgrade: false,
     interactive: false,
-    target: "major",
+    target: undefined,
     pre: false,
     cooldown: 0,
     allowDowngrade: false,
@@ -76,7 +76,7 @@ function buildArgs(directory: string, overrides: Partial<ParsedArgs> = {}): Pars
     errorOnOutdated: false,
     verboseLevel: 0,
     concurrency: 5,
-    noCache: false,
+    noCache: true,
     clearCache: false,
     ...overrides,
   };
@@ -127,7 +127,76 @@ function findDep(report: JsonReport, group: string, artifact: string) {
   );
 }
 
+function pomUrl(group: string, artifact: string, version: string): string {
+  return `${MAVEN_BASE}${group.replace(/\./g, "/")}/${artifact}/${version}/${artifact}-${version}.pom`;
+}
+
 // ── Tier 1: Cardinal correctness ──────────────────────────────────────────────
+
+describe("multi-config hierarchy: per-Occurrence target override", () => {
+  const fixture = join(FIXTURES_ROOT, "target-override");
+
+  // Root .gcu.json: target=major. Submodule .gcu.json: target=patch.
+  // Root has gson 2.10.0 (next: 2.10.1, 3.0.0); submodule has okhttp 4.11.0 (next: 4.11.1, 5.0.0).
+  // With per-Occurrence config flowing through, root must select 3.0.0 and submodule 4.11.1.
+  it("each module's target is taken from its own .gcu.json when CLI does not pass --target", async () => {
+    mockRepo(
+      buildMockMap([
+        {
+          group: "com.google.code.gson",
+          artifact: "gson",
+          versions: ["2.10.0", "2.10.1", "3.0.0"],
+        },
+        {
+          group: "com.squareup.okhttp3",
+          artifact: "okhttp",
+          versions: ["4.11.0", "4.11.1", "5.0.0"],
+        },
+      ]),
+    );
+
+    const { exitCode, report } = await runJson(fixture);
+
+    expect(exitCode).toBe(0);
+    expect(findDep(report, "com.google.code.gson", "gson")?.updated).toBe("3.0.0");
+    expect(findDep(report, "com.squareup.okhttp3", "okhttp")?.updated).toBe("4.11.1");
+  });
+
+  // CLI --target wins over every chained .gcu.json target.
+  it("CLI --target overrides chained .gcu.json target for every Occurrence", async () => {
+    mockRepo(
+      buildMockMap([
+        {
+          group: "com.google.code.gson",
+          artifact: "gson",
+          versions: ["2.10.0", "2.10.1", "3.0.0"],
+        },
+        {
+          group: "com.squareup.okhttp3",
+          artifact: "okhttp",
+          versions: ["4.11.0", "4.11.1", "5.0.0"],
+        },
+      ]),
+    );
+
+    const { exitCode, report } = await runJson(fixture, { target: "patch" });
+
+    expect(exitCode).toBe(0);
+    expect(findDep(report, "com.google.code.gson", "gson")?.updated).toBe("2.10.1");
+    expect(findDep(report, "com.squareup.okhttp3", "okhttp")?.updated).toBe("4.11.1");
+  });
+
+  // Regression guard: if args.target ever stops being undefined-when-absent,
+  // root and submodule will both select the CLI default and this test will fail.
+  it("ParsedArgs.target is undefined when --target is not passed (regression guard)", async () => {
+    const { parseArgs } = await import("../../src/cli/args.js");
+    const result = parseArgs([]);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.args.target).toBeUndefined();
+    }
+  });
+});
 
 describe("multi-config hierarchy: per-Occurrence include override", () => {
   const fixture = join(FIXTURES_ROOT, "per-occurrence-include");
@@ -368,5 +437,187 @@ describe("multi-config hierarchy: schema validation across hierarchy", () => {
     expect(errorOutput).toMatch(/submodule/);
     expect(errorOutput).toMatch(/targt/);
     expect(errorOutput).toMatch(/[Uu]nrecognized/);
+  });
+});
+
+// ── Tier 2 (continued): Behavior interactions ─────────────────────────────────
+
+describe("multi-config hierarchy: cooldown inherits across submodules", () => {
+  const fixture = join(FIXTURES_ROOT, "cooldown-allow-downgrade-mix");
+
+  // Root .gcu.json: cooldown=99999. Submodule .gcu.json: empty {}.
+  // Mock the new gson 2.10.1 with a recent Last-Modified so cooldown blocks it.
+  // If the submodule inherited cooldown=99999, both modules' gson 2.10.1 is blocked.
+  // If submodule fell through to default cooldown=0, submodule's gson would be upgraded.
+  it("submodule inherits cooldown=99999 from root and blocks recent versions", async () => {
+    const mockMap = buildMockMap([
+      {
+        group: "com.google.code.gson",
+        artifact: "gson",
+        versions: ["2.10.0", "2.10.1"],
+      },
+    ]);
+    // Add a per-version POM HEAD response with a recent Last-Modified so the
+    // 2.10.1 candidate falls inside the cooldown window.
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toUTCString();
+    mockMap[pomUrl("com.google.code.gson", "gson", "2.10.1")] = JSON.stringify({
+      status: 200,
+      body: "",
+      headers: { "last-modified": yesterday },
+    });
+    // mockRepo accepts MockResponse objects directly — re-pass the structured form
+    // for the POM URL only.
+    mockRepo({
+      ...mockMap,
+      [pomUrl("com.google.code.gson", "gson", "2.10.1")]: {
+        status: 200,
+        body: "",
+        headers: { "last-modified": yesterday },
+      },
+    });
+
+    const { exitCode, report } = await runJson(fixture);
+
+    expect(exitCode).toBe(0);
+    // Both modules' gson must be cooldown-blocked → no entries in updates[].
+    expect(report.updates.filter((entry) => entry.artifact === "gson")).toHaveLength(0);
+  });
+});
+
+describe("multi-config hierarchy: mixed formats in one project", () => {
+  const fixture = join(FIXTURES_ROOT, "mixed-formats");
+
+  // Root .gcu.json: target=major (governs the root catalog at gradle/libs.versions.toml).
+  // groovy-mod/.gcu.json: target=patch (Groovy DSL build.gradle).
+  // kotlin-mod/.gcu.json: target=minor (Kotlin DSL build.gradle.kts).
+  // catalog-mod consumes libs.gson — but the catalog literal lives at the root,
+  // so the root config (major) governs that bump.
+  it("each format in each module honors its own resolved target", async () => {
+    mockRepo(
+      buildMockMap([
+        {
+          group: "org.apache.commons",
+          artifact: "commons-lang3",
+          versions: ["3.12.0", "3.12.1", "3.14.0", "4.0.0"],
+        },
+        {
+          group: "com.squareup.okhttp3",
+          artifact: "okhttp",
+          versions: ["4.11.0", "4.11.1", "4.12.0", "5.0.0"],
+        },
+        {
+          group: "com.google.code.gson",
+          artifact: "gson",
+          versions: ["2.10.0", "2.10.1", "3.0.0"],
+        },
+      ]),
+    );
+
+    const { exitCode, report } = await runJson(fixture);
+
+    expect(exitCode).toBe(0);
+    // Groovy submodule, target=patch, current 3.12.0 → 3.12.1.
+    expect(findDep(report, "org.apache.commons", "commons-lang3")?.updated).toBe(
+      "3.12.1",
+    );
+    // Kotlin submodule, target=minor, current 4.11.0 → 4.12.0 (5.0.0 is major).
+    expect(findDep(report, "com.squareup.okhttp3", "okhttp")?.updated).toBe("4.12.0");
+    // Catalog literal at root, target=major (root config) → 3.0.0.
+    expect(findDep(report, "com.google.code.gson", "gson")?.updated).toBe("3.0.0");
+  });
+});
+
+describe("multi-config hierarchy: per-submodule gradle.properties", () => {
+  const fixture = join(FIXTURES_ROOT, "properties-per-submodule");
+
+  // submodule/gradle.properties defines gsonVersion. submodule/build.gradle.kts
+  // references $gsonVersion. The variable resolves to the submodule's own
+  // gradle.properties (the edit site), and submodule .gcu.json has target=patch.
+  // Root has empty .gcu.json (no target). With submodule's target=patch, current
+  // 2.10.0 must bump to 2.10.1, never 3.0.0.
+  it("submodule .gcu.json governs an edit in the submodule's own gradle.properties", async () => {
+    mockRepo(
+      buildMockMap([
+        {
+          group: "com.google.code.gson",
+          artifact: "gson",
+          versions: ["2.10.0", "2.10.1", "3.0.0"],
+        },
+      ]),
+    );
+
+    const { exitCode, report } = await runJson(fixture);
+
+    expect(exitCode).toBe(0);
+    expect(findDep(report, "com.google.code.gson", "gson")?.updated).toBe("2.10.1");
+  });
+});
+
+// ── Tier 3 (continued): Validation & UX ───────────────────────────────────────
+
+describe("multi-config hierarchy: --format json across mixed-config tree", () => {
+  const fixture = join(FIXTURES_ROOT, "target-override");
+
+  // Verify the JSON contract under hierarchical configs: stdout is parseable JSON,
+  // updates[] entries have the expected shape, post-policy winners only.
+  it("emits a valid JSON document with one entry per upgraded Occurrence", async () => {
+    mockRepo(
+      buildMockMap([
+        {
+          group: "com.google.code.gson",
+          artifact: "gson",
+          versions: ["2.10.0", "2.10.1", "3.0.0"],
+        },
+        {
+          group: "com.squareup.okhttp3",
+          artifact: "okhttp",
+          versions: ["4.11.0", "4.11.1", "5.0.0"],
+        },
+      ]),
+    );
+
+    const { exitCode, report } = await runJson(fixture);
+
+    expect(exitCode).toBe(0);
+    // Two upgrades, both winners — no skipped/held entries.
+    expect(report.updates).toHaveLength(2);
+    for (const entry of report.updates) {
+      expect(typeof entry.group).toBe("string");
+      expect(typeof entry.artifact).toBe("string");
+      expect(typeof entry.current).toBe("string");
+      expect(typeof entry.updated).toBe("string");
+      // 'direction' is omitted when 'up' (the default).
+      expect(entry.direction).not.toBe("up");
+    }
+  });
+});
+
+describe("multi-config hierarchy: rich-version block + per-submodule target", () => {
+  const fixture = join(FIXTURES_ROOT, "rich-version-target");
+
+  // submodule has version { strictly("2.10.0"); prefer("2.10.0") } and target=patch.
+  // Root config target=major would lift to 3.0.0; submodule's patch must keep both
+  // sibling occurrences (strictly + prefer) coherent at 2.10.1.
+  it("submodule target governs both halves of a rich-version block coherently", async () => {
+    mockRepo(
+      buildMockMap([
+        {
+          group: "com.google.code.gson",
+          artifact: "gson",
+          versions: ["2.10.0", "2.10.1", "3.0.0"],
+        },
+      ]),
+    );
+
+    const { exitCode, report } = await runJson(fixture);
+
+    expect(exitCode).toBe(0);
+    const gsonEntries = report.updates.filter((entry) => entry.artifact === "gson");
+    // One logical dependency, one update entry per Occurrence — both halves bump
+    // to 2.10.1 (patch), never 3.0.0 (which would be major).
+    expect(gsonEntries.length).toBeGreaterThanOrEqual(1);
+    for (const entry of gsonEntries) {
+      expect(entry.updated).toBe("2.10.1");
+    }
   });
 });
