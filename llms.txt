@@ -1,6 +1,6 @@
 # gradle-check-updates
 
-The missing dependency updater for Gradle. Fast, byte-precise, and security-focused CLI to upgrade dependencies in Kotlin/Groovy DSLs, Version Catalogs, and gradle.properties.
+The missing dependency updater for Gradle. Fast, precise, and security-focused CLI to upgrade dependencies in Kotlin/Groovy DSLs, Version Catalogs, and gradle.properties.
 
 ## Key Information
 - **Main Website**: https://secretx33.github.io/gradle-check-updates/
@@ -8,7 +8,7 @@ The missing dependency updater for Gradle. Fast, byte-precise, and security-focu
 - **npm Package**: https://www.npmjs.com/package/gradle-check-updates
 
 ## Features
-- **Byte-Precise**: Only version strings are modified. No reformatting or comment loss.
+- **Precise**: Only version strings are modified. No reformatting or comment loss.
 - **Fast**: Queries Maven repositories directly, bypassing Gradle daemon overhead.
 - **Comprehensive**: Supports Kotlin DSL, Groovy DSL, Version Catalogs, and gradle.properties.
 - **Security-First**: Built-in cooldown window to protect against supply-chain attacks.

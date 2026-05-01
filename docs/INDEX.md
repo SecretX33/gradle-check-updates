@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "gradle-check-updates"
   text: "The missing dependency updater for Gradle"
-  tagline: "Fast, byte-precise, and security-focused CLI to upgrade dependencies across your entire Gradle project."
+  tagline: "Fast, precise, and security-focused CLI to upgrade dependencies across your entire Gradle project."
   actions:
     - theme: brand
       text: Get Started
@@ -16,7 +16,7 @@ hero:
 features:
   - title: ⚡ Lightning Fast
     details: Queries Maven repositories directly, bypassing slow Gradle daemon overhead for instant results.
-  - title: 🎯 Byte-Precise
+  - title: 🎯 Precise
     details: Only the version string changes. No reformatting, no comment loss, no indentation mess.
   - title: 📦 Comprehensive Support
     details: Works with Kotlin DSL, Groovy DSL, Version Catalogs, and gradle.properties.

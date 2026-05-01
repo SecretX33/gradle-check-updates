@@ -4,7 +4,7 @@
 
 - **It scans your workspace:** `gcu` automatically finds all dependencies and plugins across your entire project, including complex multi-module setups.
 - **It follows variables:** If you use `gradle.properties` or Version Catalogs, `gcu` traces those variables back to their source. The upgrade always lands in the correct file.
-- **It makes surgical edits:** When applying an upgrade, `gcu` replaces *only the version number*. Every comment, space, and blank line is preserved exactly as you left it.
+- **It makes precise edits:** When applying an upgrade, `gcu` replaces *only the version number*. Every comment, space, and blank line is preserved exactly as you left it.
 
 ## Supported files
 

@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://github.com/SecretX33/gradle-check-updates/actions/workflows/ci.yml/badge.svg)](https://github.com/SecretX33/gradle-check-updates/actions/workflows/ci.yml)
 
-**The missing dependency updater for Gradle.** Fast, byte-precise, and security-focused CLI to upgrade dependencies across your entire Gradle project.
+**The missing dependency updater for Gradle.** Fast, precise, and security-focused CLI to upgrade dependencies across your entire Gradle project.
 
 gradle-check-updates (`gcu`) scans your project for outdated dependencies and plugins, fetches the latest versions from Maven repositories, and applies updates directly to your build files—all while preserving your formatting and comments exactly.
 
@@ -13,7 +13,7 @@ gradle-check-updates (`gcu`) scans your project for outdated dependencies and pl
 ## Features
 
 - ⚡ **Lightning Fast:** Queries Maven repositories directly, bypassing slow Gradle daemon overhead.
-- 🎯 **Byte-Precise:** Only the version string changes. No reformatting, no comment loss, no indentation mess.
+- 🎯 **Precise:** Only the version string changes. No reformatting, no comment loss, no indentation mess.
 - 📦 **Comprehensive Support:** Works with Kotlin DSL, Groovy DSL, Version Catalogs, and `gradle.properties`.
 - 🏗️ **Multi-Module Ready:** Handles complex project structures and shared variables in one pass.
 - 🛡️ **Security-First:** Built-in **cooldown window** to protect against supply-chain attacks.
@@ -26,12 +26,12 @@ gradle-check-updates (`gcu`) scans your project for outdated dependencies and pl
 |---|:---:|:---:|:---:|
 | **Speed** | ⚡ Instant | 🐢 Slow (runs via Gradle) | Variable |
 | **Write support** | ✅ Yes (`-u`) | ❌ No (Report only) | ✅ Manual |
-| **Byte-precise** | ✅ Yes | N/A | ❌ Often reformats |
+| **Precise** | ✅ Yes | N/A | ❌ Often reformats |
 | **Multi-module** | ✅ Native | ✅ Yes | ❌ Per-file |
 | **CI Friendly** | ✅ Yes | ✅ Yes | ❌ No |
 | **Cooldown Window** | ✅ Yes | ❌ No | ❌ No |
 
-`gcu` is designed to be the Gradle equivalent of [`npm-check-updates`](https://github.com/raineorshine/npm-check-updates).
+`gcu` is designed to be a fast and portable CLI tool.
 
 ## Quick Start
 

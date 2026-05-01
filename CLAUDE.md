@@ -22,7 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Cardinal rule — preserve the user's file exactly
 
-The rewriter MUST NOT reorder, reformat, change indentation, or lose comments. The only bytes that change are the version string itself. This rules out parse → AST → regenerate. Strategy is **byte-precise, in-place string replacement**:
+The rewriter MUST NOT reorder, reformat, change indentation, or lose comments. The only bytes that change are the version string itself. This rules out parse → AST → regenerate. Strategy is **precise, in-place string replacement**:
 
 - Each format locator emits `Occurrence` records that point to the exact location of the version literal.
 - A single rewriter (`rewrite/`) splices the new bytes in, leaving the rest of the buffer untouched.
@@ -90,6 +90,6 @@ When adding a new shape or format, add the corresponding fixture from the invent
 - When adding or removing CLI flags, always update `README.md`'s Flags table to match.
 - `--json` sends human-readable output to **stderr** so stdout stays a clean JSON document. The `updates[]` array contains only the post-policy winners (skipped/held/errored items are omitted). Entries gain `"direction": "down"` when `--allow-downgrade` triggered the choice; `"up"` is the default and is omitted.
 - Exit codes are meaningful: `1` = upgrades available without `-u` (only when `--error-on-outdated` is set), `2` = usage / config validation failure, `3` = parse error, `4` = network, `5` = rich-block coherence conflict.
-- Filter flags are `-i, --include` and `-x, --exclude` (renamed from the old `--filter` / `--skip`). `--interactive` is long-form only — `-i` belongs to `--include`.
+- Filter flags are `--include` and `--exclude` (no short forms). `-i` is the short form for `--interactive`.
 - User state lives under a single `~/.gcu/` directory (`config.json`, `credentials.json`, `cache/`) on all OSes — no XDG indirection. All gcu config is JSON. Credentials use longest-prefix URL matching; values starting with `$` resolve from `process.env`. `username`+`password` xor `token` per entry — both is a validation error.
 - Config precedence is **per Occurrence**: CLI flags > chained project `.gcu.json` (all configs from projectRoot down to edit site, innermost wins per field) > user `~/.gcu/config.json` > built-in defaults.

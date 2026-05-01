@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build `gcu`, a standalone CLI that scans Gradle projects, finds available dependency upgrades from Maven repositories, and rewrites version literals byte-precisely in place.
+**Goal:** Build `gcu`, a standalone CLI that scans Gradle projects, finds available dependency upgrades from Maven repositories, and rewrites version literals precisely in place.
 
 **Architecture:** Pipeline of pure-ish stages — `discover → locate → resolve refs → discover repos → fetch metadata → policy → report → rewrite`. The locator is the only format-specific stage; everything downstream consumes a uniform `Occurrence` type. The rewriter is a single function that splices new bytes into specific byte ranges, never reformatting. Hand-written tokenizers for Groovy DSL, Kotlin DSL, and TOML — no upstream parsers.
 
@@ -16,7 +16,7 @@
 
 1. Bootstrap & shared types
 2. Version core (parsing, ordering, shape detection)
-3. Rewriter (byte-precise editor)
+3. Rewriter (precise editor)
 4. Format locators (Groovy DSL, Kotlin DSL, version catalog, properties)
 5. Variable reference resolution
 6. Discovery walker
@@ -799,7 +799,7 @@ export function applyEdits(original: Buffer, edits: Edit[]): Buffer {
 
 ```bash
 git add src/rewrite/
-git commit -m "Add byte-precise edit applier"
+git commit -m "Add precise edit applier"
 ```
 
 ### Task 3.2: File-level rewriter
@@ -1635,7 +1635,7 @@ git commit -m "Add Kotlin DSL locator"
 - Create: `src/formats/version-catalog/locate.test.ts`
 - Create: `test/fixtures/version-catalog/{simple,range,rich-table,library-inline-version,library-version-ref}/...`
 
-Hand-written TOML scanner: just enough to parse `[versions]`, `[libraries]`, `[plugins]` tables with byte-precise locations on values.
+Hand-written TOML scanner: just enough to parse `[versions]`, `[libraries]`, `[plugins]` tables with precise locations on values.
 
 Rules:
 - `[versions]` entries `kotlin = "1.9.0"` emit Occurrence with `dependencyKey: "catalog-version:kotlin"`. They have no group/artifact until a `[libraries]` entry references them — that linkage is handled by refs/.

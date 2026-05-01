@@ -2,7 +2,7 @@
   "name": "gradle-check-updates",
   "type": "module",
   "version": "0.0.0",
-  "description": "The missing dependency updater for Gradle. Fast, byte-precise, and security-focused CLI to upgrade dependencies in Kotlin/Groovy DSLs, Version Catalogs, and gradle.properties.",
+  "description": "The missing dependency updater for Gradle. Fast, precise, and security-focused CLI to upgrade dependencies in Kotlin/Groovy DSLs, Version Catalogs, and gradle.properties.",
   "author": "SecretX33 <notyetmidnight@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/SecretX33/gradle-check-updates#readme",
