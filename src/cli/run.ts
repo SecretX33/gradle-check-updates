@@ -35,6 +35,7 @@ import { rewriteFile } from "../rewrite/file.js";
 import { renderReplacement } from "../policy/shape-rules.js";
 import type { Decision, Edit, Occurrence } from "../types.js";
 import { determineExitCode } from "./exit.js";
+import { getErrorMessage, parseConfig } from "../util/error.js";
 
 const DEFAULT_REPOS = [
   "https://repo.maven.apache.org/maven2/",
@@ -65,7 +66,7 @@ async function loadUserConfig(configPath: string): Promise<UserConfig | undefine
   try {
     const text = await readFile(configPath, "utf8");
     const parsed = JSON.parse(text) as unknown;
-    return UserConfigSchema.parse(parsed);
+    return parseConfig(UserConfigSchema, parsed);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
     throw error;
@@ -125,12 +126,9 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   try {
     userConfig = await loadUserConfig(join(gcuHome, "config.json"));
   } catch (error) {
-    if (
-      error instanceof ConfigError ||
-      (error as { name?: string }).name === "ZodError"
-    ) {
+    if (error instanceof ConfigError) {
       stderr.write(
-        `gcu: config error in ~/.gcu/config.json: ${(error as Error).message}\n`,
+        `gcu: invalid config at '~/.gcu/config.json': ${getErrorMessage(error)}\n`,
       );
       return 2;
     }
@@ -145,7 +143,9 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     credentials = await loadCredentials(join(gcuHome, "credentials.json"));
   } catch (error) {
     if (error instanceof ConfigError) {
-      stderr.write(`gcu: credentials error: ${error.message}\n`);
+      stderr.write(
+        `gcu: invalid credentials at '~/.gcu/credentials.json': ${getErrorMessage(error)}\n`,
+      );
       return 2;
     }
     throw error;
@@ -172,10 +172,10 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
       : undefined,
     (configPath, error) => {
       stderr.write(
-        `gcu: warning: could not load config file ${configPath}: ${(error as Error).message}\n`,
+        `gcu: warning: could not load config file ${configPath}: ${getErrorMessage(error)}\n`,
       );
     },
-  );
+    );
 
   // ── File scanning phase (walk + parse) ──────────────────────────────────────
   const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
@@ -340,12 +340,9 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     try {
       fileConfig = await configResolver.resolveForFile(occurrence.file);
     } catch (error) {
-      if (
-        (error as { name?: string }).name === "ZodError" ||
-        error instanceof ConfigError
-      ) {
+      if (error instanceof ConfigError) {
         stderr.write(
-          `gcu: config error near ${occurrence.file}: ${(error as Error).message}\n`,
+          `gcu: invalid config at '${occurrence.file}': ${getErrorMessage(error)}\n`,
         );
         return 2;
       }

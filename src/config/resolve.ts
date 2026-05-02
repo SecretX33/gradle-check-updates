@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { ProjectConfigSchema, type ProjectConfig, type UserConfig } from "./schema.js";
+import { parseConfig } from "../util/error.js";
 
 const CONFIG_NAMES = [".gcu.json"];
 // Note: .gcu.json5 is not supported in v1 — JSON.parse does not handle JSON5 syntax.
@@ -74,7 +75,7 @@ export class ConfigResolver {
         const text = await readFile(configPath, "utf8");
         this.fileReadCount++;
         const parsed = JSON.parse(text) as unknown;
-        const config = ProjectConfigSchema.parse(parsed);
+        const config = parseConfig(ProjectConfigSchema, parsed);
         this.onConfigLoaded?.(configPath, config);
         return config;
       } catch (err) {
