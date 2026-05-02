@@ -1,0 +1,13 @@
+[
+  {
+    "group": "org.foo",
+    "artifact": "bar",
+    "file": "INPUT",
+    "byteStart": 28,
+    "byteEnd": 47,
+    "fileType": "groovy-dsl",
+    "currentRaw": "[1.0,2.0),[3.0,4.0)",
+    "shape": "mavenRange",
+    "dependencyKey": "org.foo:bar"
+  }
+]

@@ -1,0 +1,58 @@
+{
+  "description": "Consumer's via has the pending-ref interleaved with other entries. After resolution, the pending-ref is stripped, the consumer's file is prepended, and remaining entries keep their relative order.",
+  "input": {
+    "occurrences": [
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "prop:kotlinVersion",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact"
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-stdlib",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-stdlib",
+        "file": "/app/sub/build.gradle",
+        "byteStart": 100,
+        "byteEnd": 117,
+        "fileType": "groovy-dsl",
+        "currentRaw": "$kotlinVersion",
+        "shape": "exact",
+        "via": ["/app/included/extra.gradle", "__pending_ref__:kotlinVersion", "/app/another.gradle"]
+      }
+    ]
+  },
+  "expected": {
+    "occurrences": [
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "prop:kotlinVersion",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact"
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-stdlib",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-stdlib",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact",
+        "via": ["/app/sub/build.gradle", "/app/included/extra.gradle", "/app/another.gradle"]
+      }
+    ],
+    "errors": []
+  }
+}

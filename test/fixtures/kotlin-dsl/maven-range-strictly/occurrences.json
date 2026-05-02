@@ -1,0 +1,13 @@
+[
+  {
+    "group": "org.foo",
+    "artifact": "bar",
+    "file": "INPUT",
+    "byteStart": 64,
+    "byteEnd": 73,
+    "fileType": "kotlin-dsl",
+    "currentRaw": "[1.0,2.0)",
+    "shape": "richStrictly",
+    "dependencyKey": "org.foo:bar@36"
+  }
+]

@@ -1,0 +1,1 @@
+implementation "org.foo:bar:[$minVer,$maxVer)"

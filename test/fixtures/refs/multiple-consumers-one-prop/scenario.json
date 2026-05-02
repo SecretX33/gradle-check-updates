@@ -1,0 +1,106 @@
+{
+  "description": "Three different libraries all reference the same prop. Each consumer becomes its own resolved Occurrence pointing at the same definition byte range.",
+  "input": {
+    "occurrences": [
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "prop:kotlinVersion",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact"
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-stdlib",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-stdlib",
+        "file": "/app/build.gradle",
+        "byteStart": 100,
+        "byteEnd": 117,
+        "fileType": "groovy-dsl",
+        "currentRaw": "$kotlinVersion",
+        "shape": "exact",
+        "via": ["__pending_ref__:kotlinVersion"]
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-reflect",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-reflect",
+        "file": "/app/build.gradle",
+        "byteStart": 200,
+        "byteEnd": 217,
+        "fileType": "groovy-dsl",
+        "currentRaw": "$kotlinVersion",
+        "shape": "exact",
+        "via": ["__pending_ref__:kotlinVersion"]
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-test",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-test",
+        "file": "/app/sub/build.gradle",
+        "byteStart": 50,
+        "byteEnd": 67,
+        "fileType": "groovy-dsl",
+        "currentRaw": "$kotlinVersion",
+        "shape": "exact",
+        "via": ["__pending_ref__:kotlinVersion"]
+      }
+    ]
+  },
+  "expected": {
+    "occurrences": [
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "prop:kotlinVersion",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact"
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-stdlib",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-stdlib",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact",
+        "via": ["/app/build.gradle"]
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-reflect",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-reflect",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact",
+        "via": ["/app/build.gradle"]
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-test",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-test",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact",
+        "via": ["/app/sub/build.gradle"]
+      }
+    ],
+    "errors": []
+  }
+}

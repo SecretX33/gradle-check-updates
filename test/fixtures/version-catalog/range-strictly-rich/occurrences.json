@@ -1,0 +1,13 @@
+[
+  {
+    "group": "com.example",
+    "artifact": "mylib",
+    "file": "INPUT",
+    "byteStart": 76,
+    "byteEnd": 85,
+    "fileType": "version-catalog",
+    "currentRaw": "[1.0,2.0)",
+    "shape": "richStrictly",
+    "dependencyKey": "com.example:mylib@62"
+  }
+]
