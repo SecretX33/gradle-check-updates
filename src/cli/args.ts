@@ -109,7 +109,9 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
   // cac doesn't expose a way to hide a flag from --help while keeping it functional, so we
   // detect the legacy --json flag by scanning raw argv rather than registering it as an option.
   const hasJsonFlag = argv.includes("--json");
-  const hasFormatFlag = argv.some((arg) => arg === "--format" || arg.startsWith("--format="));
+  const hasFormatFlag = argv.some(
+    (arg) => arg === "--format" || arg.startsWith("--format="),
+  );
   if (hasJsonFlag && hasFormatFlag) {
     return {
       ok: false,

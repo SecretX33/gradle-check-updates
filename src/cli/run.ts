@@ -175,7 +175,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
         `gcu: warning: could not load config file ${configPath}: ${getErrorMessage(error)}\n`,
       );
     },
-    );
+  );
 
   // ── File scanning phase (walk + parse) ──────────────────────────────────────
   const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
