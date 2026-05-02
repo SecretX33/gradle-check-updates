@@ -666,8 +666,10 @@ describe("multi-config hierarchy: rich-version block + per-submodule target", ()
 // the (a) test for the affected field. A regression of CLI precedence will
 // fail the (b) test.
 //
-// `cacheDir` and `noCache` are excluded — they affect filesystem behavior, not
-// policy decisions, and have separate cache-layer tests.
+// `cacheDir` and `noCache` are user-level only (rejected by the strict project
+// schema), so they cannot appear in a `.gcu.json` and are not part of this
+// per-Occurrence merge matrix. Their resolver-level merging is covered in
+// src/config/resolve.test.ts.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const LIB_VERSIONS_STABLE_PRE = ["1.0.0", "1.0.1", "1.1.0-alpha"];

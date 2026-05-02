@@ -174,7 +174,7 @@ describe("ConfigResolver — userConfig merging", () => {
 
 describe("ConfigResolver — deep-chain (4 levels)", () => {
   // Layout:
-  //   .gcu.json            { target:major, pre:true, noCache:true }
+  //   .gcu.json            { target:major, pre:true }
   //   a/.gcu.json          { target:minor, cooldown:5 }
   //   a/b/.gcu.json        { target:patch, exclude:["org.bad.*"] }
   //   a/b/c/.gcu.json      { cooldown:10 }
@@ -188,7 +188,6 @@ describe("ConfigResolver — deep-chain (4 levels)", () => {
     expect(resolved).toEqual({
       target: "patch", // overridden at depth 2 (a/b)
       pre: true, // inherited from root
-      noCache: true, // inherited from root
       cooldown: 10, // overridden at depth 3 (a/b/c)
       exclude: ["org.bad.*"], // inherited from depth 2
     });
@@ -224,7 +223,7 @@ describe("ConfigResolver — deep-chain (4 levels)", () => {
   it("root file sees only the root config — no inner layers leak upward", async () => {
     const resolver = new ConfigResolver(fixtureDir, undefined);
     const resolved = await resolver.resolveForFile(join(fixtureDir, "build.gradle.kts"));
-    expect(resolved).toEqual({ target: "major", pre: true, noCache: true });
+    expect(resolved).toEqual({ target: "major", pre: true });
   });
 });
 
@@ -282,12 +281,14 @@ describe("ConfigResolver — empty intermediate config", () => {
 // ── All 8 fields covered in inheritance ───────────────────────────────────────
 
 describe("ConfigResolver — all-fields inheritance", () => {
-  // Root sets: target, pre, cooldown, allowDowngrade
-  // Sub  sets: include, exclude, cacheDir, noCache
+  // Root .gcu.json sets: target, pre, cooldown, allowDowngrade
+  // Sub  .gcu.json sets: include, exclude
+  // userConfig (user-only fields): cacheDir, noCache
   const fixtureDir = join(FIXTURES_ROOT, "all-fields-chain");
 
   it("submodule file sees every field from both layers merged together", async () => {
-    const resolver = new ConfigResolver(fixtureDir, undefined);
+    const userConfig = { cacheDir: "/tmp/gcu-cache", noCache: true };
+    const resolver = new ConfigResolver(fixtureDir, userConfig);
     const resolved = await resolver.resolveForFile(
       join(fixtureDir, "sub/build.gradle.kts"),
     );
@@ -303,14 +304,17 @@ describe("ConfigResolver — all-fields inheritance", () => {
     });
   });
 
-  it("root file sees only the root-set fields, not the submodule ones", async () => {
-    const resolver = new ConfigResolver(fixtureDir, undefined);
+  it("root file sees only the root-set fields plus userConfig user-only fields, not the submodule ones", async () => {
+    const userConfig = { cacheDir: "/tmp/gcu-cache", noCache: true };
+    const resolver = new ConfigResolver(fixtureDir, userConfig);
     const resolved = await resolver.resolveForFile(join(fixtureDir, "build.gradle.kts"));
     expect(resolved).toEqual({
       target: "minor",
       pre: true,
       cooldown: 5,
       allowDowngrade: true,
+      cacheDir: "/tmp/gcu-cache",
+      noCache: true,
     });
   });
 });

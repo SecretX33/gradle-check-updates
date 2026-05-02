@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { ProjectConfigSchema, type ProjectConfig } from "./schema.js";
+import { ProjectConfigSchema, type ProjectConfig, type UserConfig } from "./schema.js";
 
 const CONFIG_NAMES = [".gcu.json"];
 // Note: .gcu.json5 is not supported in v1 — JSON.parse does not handle JSON5 syntax.
@@ -8,26 +8,26 @@ const CONFIG_NAMES = [".gcu.json"];
 
 export class ConfigResolver {
   // Cache maps a directory to the full merged chain result rooted at that directory.
-  private readonly directoryCache = new Map<string, ProjectConfig>();
+  private readonly directoryCache = new Map<string, UserConfig>();
   private readonly projectRoot: string;
   /** Number of times a config file was actually read from disk (for testing memoization). */
   fileReadCount = 0;
 
   constructor(
     projectRoot: string,
-    private readonly userConfig: ProjectConfig | undefined,
+    private readonly userConfig: UserConfig | undefined,
     private readonly onConfigLoaded?: (configPath: string, config: ProjectConfig) => void,
     private readonly onConfigError?: (configPath: string, error: Error) => void,
   ) {
     this.projectRoot = projectRoot;
   }
 
-  async resolveForFile(filePath: string, isCatalogToml = false): Promise<ProjectConfig> {
+  async resolveForFile(filePath: string, isCatalogToml = false): Promise<UserConfig> {
     const startDir = isCatalogToml ? dirname(dirname(filePath)) : dirname(filePath);
     return this.resolveChainFromDir(startDir);
   }
 
-  private async resolveChainFromDir(startDir: string): Promise<ProjectConfig> {
+  private async resolveChainFromDir(startDir: string): Promise<UserConfig> {
     if (this.directoryCache.has(startDir)) {
       return this.directoryCache.get(startDir)!;
     }
@@ -50,7 +50,7 @@ export class ConfigResolver {
     // The cache stores a *per-directory* partial merge: cache[dir] = merge of all
     // .gcu.json files from `dir` up to projectRoot, layered on top of userConfig. Caching
     // every step keeps siblings cheap while preventing inner layers from leaking upward.
-    let merged: ProjectConfig = this.userConfig ?? {};
+    let merged: UserConfig = this.userConfig ?? {};
     for (const dir of dirChain) {
       const cached = this.directoryCache.get(dir);
       if (cached !== undefined) {

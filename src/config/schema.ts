@@ -8,12 +8,17 @@ export const ProjectConfigSchema = z
     allowDowngrade: z.boolean().optional(),
     include: z.array(z.string()).optional(),
     exclude: z.array(z.string()).optional(),
-    cacheDir: z.string().optional(),
-    noCache: z.boolean().optional(),
   })
   .strict();
 
 export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
+
+export const UserConfigSchema = ProjectConfigSchema.extend({
+  cacheDir: z.string().optional(),
+  noCache: z.boolean().optional(),
+}).strict();
+
+export type UserConfig = z.infer<typeof UserConfigSchema>;
 
 export const CredentialEntrySchema = z.union([
   z

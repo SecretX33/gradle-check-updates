@@ -257,6 +257,21 @@ describe("parseArgs", () => {
     });
   });
 
+  it("rejects --json and --format used together", () => {
+    const result = parseArgs(["--json", "--format", "text"]);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatch(/--json and --format cannot be used together/);
+    }
+  });
+
+  it("rejects --json and --format=json used together (--format=value form)", () => {
+    const result = parseArgs(["--json", "--format=json"]);
+
+    expect(result.ok).toBe(false);
+  });
+
   it("accepts --format text explicitly", () => {
     const result = parseArgs(["--format", "text"]);
 

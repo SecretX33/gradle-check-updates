@@ -15,8 +15,8 @@ import { locateVersionCatalog } from "../formats/version-catalog/locate.js";
 import { locateProperties } from "../formats/properties/locate.js";
 import { resolveRefs } from "../refs/index.js";
 import { ConfigError, loadCredentials } from "../config/index.js";
-import type { ProjectConfig } from "../config/schema.js";
-import { ProjectConfigSchema } from "../config/schema.js";
+import type { UserConfig } from "../config/schema.js";
+import { UserConfigSchema } from "../config/schema.js";
 import { ConfigResolver } from "../config/resolve.js";
 import type { MavenMetadata, RepoCredentials } from "../repos/index.js";
 import {
@@ -42,6 +42,8 @@ const DEFAULT_REPOS = [
   "https://plugins.gradle.org/m2/",
 ];
 
+const DEFAULT_TARGET = "major" as const;
+
 export type RunOptions = {
   stdout?: NodeJS.WritableStream;
   stderr?: NodeJS.WritableStream;
@@ -59,11 +61,11 @@ function detectLocator(
   return null;
 }
 
-async function loadUserConfig(configPath: string): Promise<ProjectConfig | undefined> {
+async function loadUserConfig(configPath: string): Promise<UserConfig | undefined> {
   try {
     const text = await readFile(configPath, "utf8");
     const parsed = JSON.parse(text) as unknown;
-    return ProjectConfigSchema.parse(parsed);
+    return UserConfigSchema.parse(parsed);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
     throw error;
@@ -119,7 +121,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
 
   const gcuHome = options?.gcuHome ?? join(homedir(), ".gcu");
 
-  let userConfig: ProjectConfig | undefined;
+  let userConfig: UserConfig | undefined;
   try {
     userConfig = await loadUserConfig(join(gcuHome, "config.json"));
   } catch (error) {
@@ -135,7 +137,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     throw error;
   }
   if (args.verboseLevel >= 1 && userConfig !== undefined) {
-    stderr.write(`Loaded global config: ${join(gcuHome, "config.json")}\n`);
+    stderr.write(`Loaded user config: ${join(gcuHome, "config.json")}\n`);
   }
 
   let credentials: Map<string, RepoCredentials>;
@@ -313,7 +315,9 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     stderr.write("\n");
   }
 
-  const cacheDir = join(gcuHome, "cache");
+  const cacheDir = userConfig?.cacheDir
+    ? resolve(userConfig.cacheDir)
+    : join(gcuHome, "cache");
 
   if (args.clearCache) {
     await rm(cacheDir, { recursive: true, force: true });
@@ -324,7 +328,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   const clientOptions = {
     cache,
     credentials,
-    noCache: args.noCache,
+    noCache: args.noCache || (userConfig?.noCache ?? false),
     verbose: args.verboseLevel >= 1,
     stderr: stderrForClient,
   };
@@ -332,7 +336,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   // Build config map before the metadata fetch loop so cooldown settings are available
   const occurrenceConfigMap = new Map<Occurrence, PolicyOptions>();
   for (const occurrence of policyOccurrences) {
-    let fileConfig: ProjectConfig;
+    let fileConfig: UserConfig;
     try {
       fileConfig = await configResolver.resolveForFile(occurrence.file);
     } catch (error) {
@@ -348,7 +352,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
       throw error;
     }
     occurrenceConfigMap.set(occurrence, {
-      target: args.target ?? fileConfig.target ?? "major",
+      target: args.target ?? fileConfig.target ?? DEFAULT_TARGET,
       pre: args.pre || (fileConfig.pre ?? false),
       cooldownDays: args.cooldown > 0 ? args.cooldown : (fileConfig.cooldown ?? 0),
       allowDowngrade: args.allowDowngrade || (fileConfig.allowDowngrade ?? false),
@@ -358,7 +362,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   }
   const getConfig = (occurrence: Occurrence): PolicyOptions =>
     occurrenceConfigMap.get(occurrence) ?? {
-      target: args.target ?? "major",
+      target: args.target ?? DEFAULT_TARGET,
       pre: args.pre,
       cooldownDays: args.cooldown,
       allowDowngrade: args.allowDowngrade,
