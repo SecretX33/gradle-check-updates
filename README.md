@@ -55,6 +55,17 @@ gcu -u
 gcu -i
 ```
 
+## Screenshots
+
+### Preview available upgrades
+<img alt="Dry-run" src="./docs/images/dry_run.png">
+
+### Apply upgrades
+<img alt="Dry-run" src="./docs/images/update_run.png">
+
+### Interactive mode
+<img alt="Dry-run" src="./docs/images/interactive_run.png">
+
 ---
 
 For full documentation, command-line options, and advanced configuration, visit **[https://secretx33.github.io/gradle-check-updates/](https://secretx33.github.io/gradle-check-updates/)**.
