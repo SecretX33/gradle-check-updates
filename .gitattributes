@@ -4,3 +4,4 @@
 # Keep CRLF fixture files byte-for-byte intact
 test/fixtures/groovy-dsl/exact-crlf/* binary
 test/fixtures/kotlin-dsl/exact-crlf/* binary
+test/fixtures/properties/crlf-endings/* binary

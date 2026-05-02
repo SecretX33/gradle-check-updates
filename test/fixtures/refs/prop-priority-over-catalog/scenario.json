@@ -1,0 +1,80 @@
+{
+  "description": "When the same name is defined as both a prop and a catalog-version, the prop wins. Consumer resolves to the prop location.",
+  "input": {
+    "occurrences": [
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "prop:kotlinVersion",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact"
+      },
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "catalog-version:kotlinVersion",
+        "file": "/app/gradle/libs.versions.toml",
+        "byteStart": 30,
+        "byteEnd": 35,
+        "fileType": "version-catalog",
+        "currentRaw": "1.8.0",
+        "shape": "exact"
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-stdlib",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-stdlib",
+        "file": "/app/build.gradle",
+        "byteStart": 100,
+        "byteEnd": 117,
+        "fileType": "groovy-dsl",
+        "currentRaw": "$kotlinVersion",
+        "shape": "exact",
+        "via": ["__pending_ref__:kotlinVersion"]
+      }
+    ]
+  },
+  "expected": {
+    "occurrences": [
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "prop:kotlinVersion",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact"
+      },
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "catalog-version:kotlinVersion",
+        "file": "/app/gradle/libs.versions.toml",
+        "byteStart": 30,
+        "byteEnd": 35,
+        "fileType": "version-catalog",
+        "currentRaw": "1.8.0",
+        "shape": "exact"
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-stdlib",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-stdlib",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact",
+        "via": ["/app/build.gradle"]
+      }
+    ],
+    "errors": []
+  }
+}

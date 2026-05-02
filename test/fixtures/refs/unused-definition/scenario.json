@@ -1,0 +1,34 @@
+{
+  "description": "A prop definition with no consumers passes through unchanged with no errors.",
+  "input": {
+    "occurrences": [
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "prop:unusedVersion",
+        "file": "/app/gradle.properties",
+        "byteStart": 16,
+        "byteEnd": 21,
+        "fileType": "properties",
+        "currentRaw": "4.5.0",
+        "shape": "exact"
+      }
+    ]
+  },
+  "expected": {
+    "occurrences": [
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "prop:unusedVersion",
+        "file": "/app/gradle.properties",
+        "byteStart": 16,
+        "byteEnd": 21,
+        "fileType": "properties",
+        "currentRaw": "4.5.0",
+        "shape": "exact"
+      }
+    ],
+    "errors": []
+  }
+}

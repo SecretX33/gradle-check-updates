@@ -56,7 +56,7 @@ function buildArgs(overrides: Partial<ParsedArgs> = {}): ParsedArgs {
     allowDowngrade: false,
     include: [],
     exclude: [],
-    json: false,
+    format: "text",
     errorOnOutdated: false,
     verboseLevel: 0,
     concurrency: 5,
@@ -170,7 +170,7 @@ describe("run() — JSON output", () => {
       },
     } as unknown as NodeJS.WritableStream;
 
-    const exitCode = await run(buildArgs({ directory: tempDir, json: true }), {
+    const exitCode = await run(buildArgs({ directory: tempDir, format: "json" }), {
       stdout: fakeStdout,
       stderr: fakeStderr,
     });
@@ -196,7 +196,7 @@ describe("run() — JSON output", () => {
   });
 });
 
-describe("run() — --json quiet mode", () => {
+describe("run() — --format json quiet mode", () => {
   it("writes nothing to stderr during a normal run", async () => {
     const buildFile = join(tempDir, "build.gradle.kts");
     await writeFile(buildFile, SAMPLE_BUILD_GRADLE_KTS, "utf8");
@@ -217,7 +217,7 @@ describe("run() — --json quiet mode", () => {
       },
     } as unknown as NodeJS.WritableStream;
 
-    const exitCode = await run(buildArgs({ directory: tempDir, json: true }), {
+    const exitCode = await run(buildArgs({ directory: tempDir, format: "json" }), {
       stdout: fakeStdout,
       stderr: fakeStderr,
     });
@@ -246,7 +246,7 @@ describe("run() — --json quiet mode", () => {
       },
     } as unknown as NodeJS.WritableStream;
 
-    await run(buildArgs({ directory: tempDir, json: true }), {
+    await run(buildArgs({ directory: tempDir, format: "json" }), {
       stdout: fakeStdout,
       stderr: fakeStderr,
     });
@@ -277,7 +277,7 @@ describe("run() — --json quiet mode", () => {
       },
     } as unknown as NodeJS.WritableStream;
 
-    await run(buildArgs({ directory: tempDir, json: true }), {
+    await run(buildArgs({ directory: tempDir, format: "json" }), {
       stdout: fakeStdout,
       stderr: fakeStderr,
     });
@@ -305,7 +305,7 @@ describe("run() — --json quiet mode", () => {
       },
     } as unknown as NodeJS.WritableStream;
 
-    const exitCode = await run(buildArgs({ directory: tempDir, json: true }), {
+    const exitCode = await run(buildArgs({ directory: tempDir, format: "json" }), {
       stdout: fakeStdout,
       stderr: fakeStderr,
     });

@@ -1,0 +1,1 @@
+{ "target": "patch", "exclude": ["org.bad.*"] }

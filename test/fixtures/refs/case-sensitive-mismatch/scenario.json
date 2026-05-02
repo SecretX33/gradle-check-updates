@@ -1,0 +1,62 @@
+{
+  "description": "Lookup is case-sensitive. A consumer requesting 'KotlinVersion' will NOT match a 'kotlinVersion' definition; instead it produces a RefError. This locks the current behavior — flip if case-insensitive matching is ever introduced.",
+  "input": {
+    "occurrences": [
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "prop:kotlinVersion",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact"
+      },
+      {
+        "group": "org.jetbrains.kotlin",
+        "artifact": "kotlin-stdlib",
+        "dependencyKey": "org.jetbrains.kotlin:kotlin-stdlib",
+        "file": "/app/build.gradle",
+        "byteStart": 100,
+        "byteEnd": 117,
+        "fileType": "groovy-dsl",
+        "currentRaw": "$KotlinVersion",
+        "shape": "exact",
+        "via": ["__pending_ref__:KotlinVersion"]
+      }
+    ]
+  },
+  "expected": {
+    "occurrences": [
+      {
+        "group": "",
+        "artifact": "",
+        "dependencyKey": "prop:kotlinVersion",
+        "file": "/app/gradle.properties",
+        "byteStart": 14,
+        "byteEnd": 19,
+        "fileType": "properties",
+        "currentRaw": "1.9.0",
+        "shape": "exact"
+      }
+    ],
+    "errors": [
+      {
+        "varName": "KotlinVersion",
+        "consumer": {
+          "group": "org.jetbrains.kotlin",
+          "artifact": "kotlin-stdlib",
+          "dependencyKey": "org.jetbrains.kotlin:kotlin-stdlib",
+          "file": "/app/build.gradle",
+          "byteStart": 100,
+          "byteEnd": 117,
+          "fileType": "groovy-dsl",
+          "currentRaw": "$KotlinVersion",
+          "shape": "exact",
+          "via": ["__pending_ref__:KotlinVersion"]
+        }
+      }
+    ]
+  }
+}

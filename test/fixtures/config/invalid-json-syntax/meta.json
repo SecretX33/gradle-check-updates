@@ -1,0 +1,5 @@
+{
+  "kind": "project",
+  "expectWarningMatch": "JSON",
+  "note": "ConfigResolver treats JSON SyntaxError as a warning (file is skipped, run continues). Schema/Zod errors still throw."
+}

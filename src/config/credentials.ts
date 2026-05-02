@@ -1,6 +1,7 @@
 import { readFile, stat } from "node:fs/promises";
 import type { RepoCredentials } from "../repos/index.js";
 import { CredentialsFileSchema } from "./schema.js";
+import { parseConfig } from "../util/error.js";
 
 export class ConfigError extends Error {
   constructor(message: string) {
@@ -41,7 +42,7 @@ export async function loadCredentials(
   }
 
   const parsed = JSON.parse(text) as unknown;
-  const validated = CredentialsFileSchema.parse(parsed);
+  const validated = parseConfig(CredentialsFileSchema, parsed);
 
   const result = new Map<string, RepoCredentials>();
   for (const entry of validated.repositories) {

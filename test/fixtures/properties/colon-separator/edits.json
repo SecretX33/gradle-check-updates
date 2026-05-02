@@ -1,0 +1,4 @@
+[
+  { "byteStart": 15, "byteEnd": 20, "replacement": "2.0.21" },
+  { "byteStart": 36, "byteEnd": 41, "replacement": "3.2.5" }
+]

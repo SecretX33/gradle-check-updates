@@ -1,16 +1,17 @@
 import cac from "cac";
+import kleur from "kleur";
 
 export type ParsedArgs = {
   directory: string;
   upgrade: boolean;
   interactive: boolean;
-  target: "major" | "minor" | "patch";
+  target: "major" | "minor" | "patch" | undefined;
   pre: boolean;
   cooldown: number;
   allowDowngrade: boolean;
   include: string[];
   exclude: string[];
-  json: boolean;
+  format: "text" | "json";
   errorOnOutdated: boolean;
   verboseLevel: 0 | 1 | 2;
   concurrency: number;
@@ -23,6 +24,7 @@ export type ArgsParseResult =
   | { ok: false; error: string };
 
 const VALID_TARGETS = ["major", "minor", "patch"] as const;
+const VALID_FORMATS = ["text", "json"] as const;
 
 function normalizeToStringArray(value: unknown): string[] {
   if (value === undefined) return [];
@@ -42,9 +44,7 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
     .usage("[directory] [options]")
     .option("-u, --upgrade", "Write changes to disk", { default: false })
     .option("-i, --interactive", "TUI picker", { default: false })
-    .option("-t, --target <target>", "Version ceiling: major, minor, or patch", {
-      default: "major",
-    })
+    .option("-t, --target <target>", "Version ceiling: major, minor, or patch")
     .option("--pre", "Allow prereleases as candidates", { default: false })
     .option("-c, --cooldown <days>", "Skip versions newer than N days", { default: 0 })
     .option("--allow-downgrade", "Cooldown escape hatch (requires --cooldown)", {
@@ -52,7 +52,7 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
     })
     .option("--include <pattern>", "Include filter (repeatable)")
     .option("--exclude <pattern>", "Exclude filter (repeatable)")
-    .option("--json", "JSON output mode", { default: false })
+    .option("--format <format>", "Output format: text or json", { default: "text" })
     .option("--error-on-outdated", "Exit 1 when upgrades available but -u not passed", {
       default: false,
     })
@@ -88,11 +88,47 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
 
   const directory = typeof args[0] === "string" ? args[0] : ".";
 
-  const target = options["target"] as string;
-  if (!VALID_TARGETS.includes(target as "major" | "minor" | "patch")) {
+  const rawTarget = options["target"];
+  let target: "major" | "minor" | "patch" | undefined;
+  if (rawTarget === undefined) {
+    target = undefined;
+  } else if (
+    typeof rawTarget === "string" &&
+    VALID_TARGETS.includes(rawTarget as "major" | "minor" | "patch")
+  ) {
+    target = rawTarget as "major" | "minor" | "patch";
+  } else {
     return {
       ok: false,
-      error: `Invalid --target value "${target}". Must be one of: major, minor, patch.`,
+      error: `Invalid --target value "${rawTarget}". Must be one of: major, minor, patch.`,
+    };
+  }
+
+  let format = options["format"] as string;
+
+  // cac doesn't expose a way to hide a flag from --help while keeping it functional, so we
+  // detect the legacy --json flag by scanning raw argv rather than registering it as an option.
+  const hasJsonFlag = argv.includes("--json");
+  const hasFormatFlag = argv.some(
+    (arg) => arg === "--format" || arg.startsWith("--format="),
+  );
+  if (hasJsonFlag && hasFormatFlag) {
+    return {
+      ok: false,
+      error: `--json and --format cannot be used together. --json is deprecated; use ${kleur.yellow("--format json")} instead.`,
+    };
+  }
+  if (hasJsonFlag) {
+    process.stderr.write(
+      `gcu: warning: --json is deprecated. Please use ${kleur.yellow("--format json")} instead.\n`,
+    );
+    format = "json";
+  }
+
+  if (!VALID_FORMATS.includes(format as "text" | "json")) {
+    return {
+      ok: false,
+      error: `Invalid --format value "${format}". Must be one of: text, json.`,
     };
   }
 
@@ -148,13 +184,13 @@ export function parseArgs(argv: string[] = process.argv.slice(2)): ArgsParseResu
       directory,
       upgrade: options["upgrade"] as boolean,
       interactive: options["interactive"] as boolean,
-      target: target as "major" | "minor" | "patch",
+      target,
       pre: options["pre"] as boolean,
       cooldown,
       allowDowngrade,
       include: normalizeToStringArray(options["include"]),
       exclude: normalizeToStringArray(options["exclude"]),
-      json: options["json"] as boolean,
+      format: format as "text" | "json",
       errorOnOutdated: options["errorOnOutdated"] as boolean,
       verboseLevel,
       concurrency,

@@ -24,7 +24,7 @@ This rules out "parse → AST → regenerate" approaches. The strategy is **surg
 4. Discover repos   parse repositories { } blocks; merge with defaults
 5. Fetch metadata   query each repo for available versions + publish dates
 6. Decide upgrade   apply policy (target, pre, cooldown, filter, skip)
-7. Render report    table (default), JSON (--json), or interactive (-i)
+7. Render report    text (default), JSON (--format json), or interactive (-i)
 8. Apply (if -u)    surgical rewrite; never reorder or reformat
 ```
 
@@ -338,7 +338,7 @@ There is **no `--no-color` flag**. Color is enabled when `process.stdout.isTTY` 
 
 When stdout is not a TTY, Unicode arrows are also replaced with ASCII fallbacks (`→` → `->`, `↓` → `v`) and tree glyphs degrade to ASCII (`├──` → `|--`, `└──` → `\\--`).
 
-### `--json` output
+### `--format json` output
 
 A single object with one field, `updates`, containing only the changes the tool would apply (after target/pre/cooldown/include/exclude):
 
@@ -357,7 +357,7 @@ A single object with one field, `updates`, containing only the changes the tool 
 
 `direction` is `"up"` when omitted. It is only ever set to `"down"` when `--allow-downgrade` triggered the selection.
 
-When `--json` is set, all human-readable output goes to stderr so stdout stays a clean JSON document.
+When `--format json` is set, all human-readable output goes to stderr so stdout stays a clean JSON document.
 
 Stable contract: any future field additions are additive per object. Existing keys are never broken.
 

@@ -15,8 +15,8 @@ import { locateVersionCatalog } from "../formats/version-catalog/locate.js";
 import { locateProperties } from "../formats/properties/locate.js";
 import { resolveRefs } from "../refs/index.js";
 import { ConfigError, loadCredentials } from "../config/index.js";
-import type { ProjectConfig } from "../config/schema.js";
-import { ProjectConfigSchema } from "../config/schema.js";
+import type { UserConfig } from "../config/schema.js";
+import { UserConfigSchema } from "../config/schema.js";
 import { ConfigResolver } from "../config/resolve.js";
 import type { MavenMetadata, RepoCredentials } from "../repos/index.js";
 import {
@@ -35,12 +35,15 @@ import { rewriteFile } from "../rewrite/file.js";
 import { renderReplacement } from "../policy/shape-rules.js";
 import type { Decision, Edit, Occurrence } from "../types.js";
 import { determineExitCode } from "./exit.js";
+import { getErrorMessage, parseConfig } from "../util/error.js";
 
 const DEFAULT_REPOS = [
   "https://repo.maven.apache.org/maven2/",
   "https://maven.google.com/",
   "https://plugins.gradle.org/m2/",
 ];
+
+const DEFAULT_TARGET = "major" as const;
 
 export type RunOptions = {
   stdout?: NodeJS.WritableStream;
@@ -59,11 +62,11 @@ function detectLocator(
   return null;
 }
 
-async function loadUserConfig(configPath: string): Promise<ProjectConfig | undefined> {
+async function loadUserConfig(configPath: string): Promise<UserConfig | undefined> {
   try {
     const text = await readFile(configPath, "utf8");
     const parsed = JSON.parse(text) as unknown;
-    return ProjectConfigSchema.parse(parsed);
+    return parseConfig(UserConfigSchema, parsed);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
     throw error;
@@ -74,7 +77,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   const stdout = options?.stdout ?? process.stdout;
   const stderr = options?.stderr ?? process.stderr;
   const isStderrTTY = Boolean((stderr as NodeJS.WriteStream).isTTY);
-  const quietMode = args.json;
+  const quietMode = args.format === "json";
 
   // Progress bar state — declared early so the stderrForClient closure can reference them.
   let progressActive = false;
@@ -119,23 +122,20 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
 
   const gcuHome = options?.gcuHome ?? join(homedir(), ".gcu");
 
-  let userConfig: ProjectConfig | undefined;
+  let userConfig: UserConfig | undefined;
   try {
     userConfig = await loadUserConfig(join(gcuHome, "config.json"));
   } catch (error) {
-    if (
-      error instanceof ConfigError ||
-      (error as { name?: string }).name === "ZodError"
-    ) {
+    if (error instanceof ConfigError) {
       stderr.write(
-        `gcu: config error in ~/.gcu/config.json: ${(error as Error).message}\n`,
+        `gcu: invalid config at '~/.gcu/config.json': ${getErrorMessage(error)}\n`,
       );
       return 2;
     }
     throw error;
   }
   if (args.verboseLevel >= 1 && userConfig !== undefined) {
-    stderr.write(`Loaded global config: ${join(gcuHome, "config.json")}\n`);
+    stderr.write(`Loaded user config: ${join(gcuHome, "config.json")}\n`);
   }
 
   let credentials: Map<string, RepoCredentials>;
@@ -143,7 +143,9 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     credentials = await loadCredentials(join(gcuHome, "credentials.json"));
   } catch (error) {
     if (error instanceof ConfigError) {
-      stderr.write(`gcu: credentials error: ${error.message}\n`);
+      stderr.write(
+        `gcu: invalid credentials at '~/.gcu/credentials.json': ${getErrorMessage(error)}\n`,
+      );
       return 2;
     }
     throw error;
@@ -170,7 +172,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
       : undefined,
     (configPath, error) => {
       stderr.write(
-        `gcu: warning: could not load config file ${configPath}: ${(error as Error).message}\n`,
+        `gcu: warning: could not load config file ${configPath}: ${getErrorMessage(error)}\n`,
       );
     },
   );
@@ -313,7 +315,9 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
     stderr.write("\n");
   }
 
-  const cacheDir = join(gcuHome, "cache");
+  const cacheDir = userConfig?.cacheDir
+    ? resolve(userConfig.cacheDir)
+    : join(gcuHome, "cache");
 
   if (args.clearCache) {
     await rm(cacheDir, { recursive: true, force: true });
@@ -324,7 +328,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   const clientOptions = {
     cache,
     credentials,
-    noCache: args.noCache,
+    noCache: args.noCache || (userConfig?.noCache ?? false),
     verbose: args.verboseLevel >= 1,
     stderr: stderrForClient,
   };
@@ -332,23 +336,20 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   // Build config map before the metadata fetch loop so cooldown settings are available
   const occurrenceConfigMap = new Map<Occurrence, PolicyOptions>();
   for (const occurrence of policyOccurrences) {
-    let fileConfig: ProjectConfig;
+    let fileConfig: UserConfig;
     try {
       fileConfig = await configResolver.resolveForFile(occurrence.file);
     } catch (error) {
-      if (
-        (error as { name?: string }).name === "ZodError" ||
-        error instanceof ConfigError
-      ) {
+      if (error instanceof ConfigError) {
         stderr.write(
-          `gcu: config error near ${occurrence.file}: ${(error as Error).message}\n`,
+          `gcu: invalid config at '${occurrence.file}': ${getErrorMessage(error)}\n`,
         );
         return 2;
       }
       throw error;
     }
     occurrenceConfigMap.set(occurrence, {
-      target: args.target ?? fileConfig.target,
+      target: args.target ?? fileConfig.target ?? DEFAULT_TARGET,
       pre: args.pre || (fileConfig.pre ?? false),
       cooldownDays: args.cooldown > 0 ? args.cooldown : (fileConfig.cooldown ?? 0),
       allowDowngrade: args.allowDowngrade || (fileConfig.allowDowngrade ?? false),
@@ -358,7 +359,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
   }
   const getConfig = (occurrence: Occurrence): PolicyOptions =>
     occurrenceConfigMap.get(occurrence) ?? {
-      target: args.target,
+      target: args.target ?? DEFAULT_TARGET,
       pre: args.pre,
       cooldownDays: args.cooldown,
       allowDowngrade: args.allowDowngrade,
@@ -576,7 +577,7 @@ export async function run(args: ParsedArgs, options?: RunOptions): Promise<numbe
 
   let interactiveSelectedDecisions: Decision[] | null = null;
 
-  if (args.json) {
+  if (args.format === "json") {
     const jsonOutput = renderJson(decisions);
     stdout.write(jsonOutput + "\n");
   } else if (args.interactive) {

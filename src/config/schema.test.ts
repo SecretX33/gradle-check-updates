@@ -3,6 +3,7 @@ import {
   CredentialEntrySchema,
   CredentialsFileSchema,
   ProjectConfigSchema,
+  UserConfigSchema,
 } from "./schema.js";
 
 describe("ProjectConfigSchema", () => {
@@ -14,8 +15,6 @@ describe("ProjectConfigSchema", () => {
       allowDowngrade: false,
       include: ["com.example:*"],
       exclude: ["org.test:lib"],
-      cacheDir: "/tmp/gcu-cache",
-      noCache: false,
     };
     const result = ProjectConfigSchema.parse(input);
     expect(result).toEqual(input);
@@ -28,6 +27,14 @@ describe("ProjectConfigSchema", () => {
 
   it("rejects an unknown key (strict enforcement)", () => {
     expect(() => ProjectConfigSchema.parse({ unknownKey: "value" })).toThrow();
+  });
+
+  it("rejects cacheDir (user-level only)", () => {
+    expect(() => ProjectConfigSchema.parse({ cacheDir: "/tmp/x" })).toThrow();
+  });
+
+  it("rejects noCache (user-level only)", () => {
+    expect(() => ProjectConfigSchema.parse({ noCache: true })).toThrow();
   });
 
   it("rejects a non-enum target value", () => {
@@ -46,6 +53,55 @@ describe("ProjectConfigSchema", () => {
     for (const target of ["major", "minor", "patch"] as const) {
       expect(() => ProjectConfigSchema.parse({ target })).not.toThrow();
     }
+  });
+});
+
+describe("UserConfigSchema", () => {
+  it("parses a valid full config object including user-only fields", () => {
+    const input = {
+      target: "minor",
+      pre: false,
+      cooldown: 7,
+      allowDowngrade: false,
+      include: ["com.example:*"],
+      exclude: ["org.test:lib"],
+      cacheDir: "/tmp/gcu-cache",
+      noCache: false,
+    };
+    const result = UserConfigSchema.parse(input);
+    expect(result).toEqual(input);
+  });
+
+  it("parses an empty object (all fields optional)", () => {
+    expect(UserConfigSchema.parse({})).toEqual({});
+  });
+
+  it("accepts cacheDir on its own", () => {
+    expect(UserConfigSchema.parse({ cacheDir: "/x" })).toEqual({ cacheDir: "/x" });
+  });
+
+  it("accepts noCache on its own", () => {
+    expect(UserConfigSchema.parse({ noCache: true })).toEqual({ noCache: true });
+  });
+
+  it("accepts every project field for parity", () => {
+    const input = {
+      target: "patch" as const,
+      pre: true,
+      cooldown: 0,
+      allowDowngrade: true,
+      include: [],
+      exclude: [],
+    };
+    expect(UserConfigSchema.parse(input)).toEqual(input);
+  });
+
+  it("rejects an unknown key (strict enforcement)", () => {
+    expect(() => UserConfigSchema.parse({ unknownKey: "value" })).toThrow();
+  });
+
+  it("rejects a non-string cacheDir", () => {
+    expect(() => UserConfigSchema.parse({ cacheDir: 123 })).toThrow();
   });
 });
 
